@@ -1,6 +1,6 @@
 /* Service worker — installable + offline. */
 const CACHE = 'app-v2';
-const PRECACHE = ['index.html', 'assets/platform.js', 'assets/responsive.css', 'assets/icon-192.png', 'assets/icon-512.png', 'manifest.json'];
+const PRECACHE = ['index.html', 'assets/platform.js', 'assets/app-hooks.js', 'assets/responsive.css', 'assets/icon-192.png', 'assets/icon-512.png', 'manifest.json'];
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {

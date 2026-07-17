@@ -307,6 +307,85 @@
     products: PRODUCTS
   };
 
+  /* ---------- portal: live team feed ----------
+     Shows what the separate apps are reporting (invoices fiscalised,
+     fraud alerts, lockdowns) — visible proof they work as a team. */
+  if (CFG.product === 'portal') {
+    var feedCss = document.createElement('style');
+    feedCss.textContent =
+      '.ufp-feed-pill{position:fixed;bottom:22px;left:22px;z-index:99991;display:flex;align-items:center;gap:8px;'
+      + 'background:#0d0f14;border:1px solid #242c40;color:#e8ecf8;padding:10px 16px;border-radius:999px;'
+      + 'font:600 12px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.5);transition:all .15s}'
+      + '.ufp-feed-pill:hover{border-color:#18d8c0;color:#18d8c0}'
+      + '.ufp-feed-badge{background:#f04040;color:#fff;border-radius:999px;font-size:10px;padding:1px 7px;display:none}'
+      + '.ufp-feed-panel{position:fixed;bottom:74px;left:22px;z-index:99992;width:min(360px,calc(100vw - 44px));max-height:50vh;'
+      + 'background:#0d0f14;border:1px solid #242c40;border-radius:14px;display:none;flex-direction:column;overflow:hidden;'
+      + 'box-shadow:0 12px 48px rgba(0,0,0,.7);font-family:Inter,system-ui,sans-serif}'
+      + '.ufp-feed-panel.open{display:flex}'
+      + '.ufp-feed-head{padding:12px 14px;border-bottom:1px solid #1c2130;background:#12151c;font:600 12px Inter,sans-serif;color:#e8ecf8}'
+      + '.ufp-feed-list{overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}'
+      + '.ufp-feed-item{background:#171b24;border:1px solid #1c2130;border-radius:9px;padding:9px 11px}'
+      + '.ufp-feed-item.alert{border-color:#480000;background:#140000}'
+      + '.ufp-feed-t{font-size:12px;font-weight:600;color:#e8ecf8}'
+      + '.ufp-feed-d{font-size:11px;color:#6070a0;margin-top:3px;line-height:1.45}'
+      + '.ufp-feed-m{font-size:10px;color:#2a3050;margin-top:4px;font-family:JetBrains Mono,monospace}'
+      + '@media(max-width:620px){.ufp-feed-pill{bottom:88px}}';
+    document.head.appendChild(feedCss);
+
+    var pill = document.createElement('button');
+    pill.className = 'ufp-feed-pill';
+    pill.innerHTML = '&#128225; Team Feed <span class="ufp-feed-badge" id="ufp-feed-badge"></span>';
+    var fpanel = document.createElement('div');
+    fpanel.className = 'ufp-feed-panel';
+    fpanel.innerHTML = '<div class="ufp-feed-head">&#128225; Live Team Feed — what the 15 apps are reporting</div>'
+      + '<div class="ufp-feed-list" id="ufp-feed-list"><div class="ufp-feed-item"><div class="ufp-feed-d">Loading…</div></div></div>';
+    document.body.appendChild(pill);
+    document.body.appendChild(fpanel);
+
+    var lastSeen = 0;
+    function renderFeed(evts) {
+      var list = document.getElementById('ufp-feed-list');
+      if (!evts.length) {
+        list.innerHTML = '<div class="ufp-feed-item"><div class="ufp-feed-d">No team activity yet. Open TaxLink and fiscalise an invoice, or run a GuardPost crate scan — events appear here for every app to see.</div></div>';
+        return;
+      }
+      list.innerHTML = evts.slice().reverse().map(function (e) {
+        var app = (PRODUCTS[e.product] || {}).name || e.product;
+        return '<div class="ufp-feed-item ' + (e.type === 'alert' ? 'alert' : '') + '">'
+          + '<div class="ufp-feed-t">' + (e.type === 'alert' ? '&#128680; ' : '&#9989; ') + escapeHtml(e.title) + '</div>'
+          + (e.detail ? '<div class="ufp-feed-d">' + escapeHtml(e.detail) + '</div>' : '')
+          + '<div class="ufp-feed-m">' + escapeHtml(app) + ' &middot; ' + new Date(e.at).toLocaleTimeString() + '</div></div>';
+      }).join('');
+    }
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    function pollFeed() {
+      if (!API) return;
+      CFG.client.feed().then(function (evts) {
+        renderFeed(evts);
+        var unseen = evts.filter(function (e) { return Date.parse(e.at) > lastSeen; }).length;
+        var badge = document.getElementById('ufp-feed-badge');
+        if (unseen && !fpanel.classList.contains('open')) { badge.style.display = 'inline'; badge.textContent = unseen; }
+      }).catch(function () {
+        var list = document.getElementById('ufp-feed-list');
+        if (list) list.innerHTML = '<div class="ufp-feed-item"><div class="ufp-feed-d">Backend offline — the feed goes live once the Render API is deployed.</div></div>';
+      });
+    }
+    pill.addEventListener('click', function () {
+      fpanel.classList.toggle('open');
+      if (fpanel.classList.contains('open')) {
+        lastSeen = Date.now();
+        document.getElementById('ufp-feed-badge').style.display = 'none';
+        pollFeed();
+      }
+    });
+    pollFeed();
+    setInterval(pollFeed, 25000);
+  }
+
   /* ---------- backend health ---------- */
   function ping() {
     if (!API) return;

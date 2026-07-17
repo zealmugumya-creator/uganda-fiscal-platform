@@ -3,15 +3,20 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
+// Serves the portal at / and each separated app at /apps/<slug>/
 const ROOT = path.join(__dirname, 'frontend');
+const APPS = path.join(__dirname, 'apps');
 const PORT = process.env.PORT || 8788;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
 http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
   if (p === '/') p = '/index.html';
-  const fp = path.join(ROOT, path.normalize(p).replace(/^([.][.][\\/])+/, ''));
-  if (!fp.startsWith(ROOT) || !fs.existsSync(fp) || fs.statSync(fp).isDirectory()) {
+  if (p.endsWith('/')) p += 'index.html';
+  let base = ROOT;
+  if (p.startsWith('/apps/')) { base = APPS; p = p.slice(5); }
+  const fp = path.join(base, path.normalize(p).replace(/^([.][.][\\/])+/, ''));
+  if (!fp.startsWith(base) || !fs.existsSync(fp) || fs.statSync(fp).isDirectory()) {
     res.writeHead(404); return res.end('not found');
   }
   res.writeHead(200, { 'Content-Type': MIME[path.extname(fp).toLowerCase()] || 'application/octet-stream' });
