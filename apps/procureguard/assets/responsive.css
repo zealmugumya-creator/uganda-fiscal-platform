@@ -1,0 +1,51 @@
+/* ============================================================
+   Uganda Fiscal Platform — shared responsive layer
+   Applied to every app. Handles the common shell:
+   .app (flex row, 100vh) + .sb (fixed sidebar) + .main (scroll)
+   Grid folding for stat/card grids is done in platform.js,
+   which measures actual track counts at runtime.
+   ============================================================ */
+* { min-width: 0; }
+html { -webkit-text-size-adjust: 100%; }
+img, svg, canvas, video { max-width: 100%; height: auto; }
+
+@media (max-width: 900px) {
+  body { overflow-x: hidden; }
+
+  /* App shell: sidebar becomes a sticky top bar that scrolls horizontally */
+  .app { flex-direction: column !important; height: auto !important; min-height: 100vh; overflow: visible !important; }
+  .sb {
+    width: 100% !important; height: auto !important;
+    flex-direction: row !important; align-items: center;
+    overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
+    border-right: none !important; border-bottom: 1px solid var(--bd, #1c2130);
+    position: sticky; top: 0; z-index: 80;
+  }
+  .sb > * { flex-shrink: 0; }
+  .sb .nav {
+    display: flex; flex-direction: row; gap: 4px;
+    overflow-y: visible; overflow-x: auto; padding: 6px 8px; flex: 1;
+  }
+  .sb .nav > * { flex-shrink: 0; white-space: nowrap; }
+  .sb-kpi, .sb-live, .sb-engine { min-width: 180px; }
+  .main { overflow: visible !important; height: auto !important; }
+
+  /* Headers wrap instead of overflowing */
+  .header { flex-wrap: wrap; gap: 8px; padding: 12px 14px !important; }
+  .h-nav { flex-wrap: wrap; }
+
+  /* Tables scroll sideways instead of breaking the page */
+  table { display: block; overflow-x: auto; }
+
+  /* Generic content padding reduction */
+  .page, .content, .section { padding-left: 14px !important; padding-right: 14px !important; }
+}
+
+@media (max-width: 620px) {
+  .header { padding: 10px 12px !important; }
+  /* Keep the floating controls out of the way on phones */
+  .ufp-back { top: auto; bottom: 24px; left: 14px; }
+  #ufp-install { top: auto !important; bottom: 88px; right: 22px; left: auto !important; }
+  /* Modals fit the screen */
+  [class*="modal"] > div, .mc { max-width: calc(100vw - 20px) !important; }
+}

@@ -1,11 +1,10 @@
 {
-  "name": "Uganda Fiscal Intelligence Platform",
-  "short_name": "UgandaFiscal",
-  "description": "15 products fighting tax evasion, fraud and fiscal waste in Uganda — with embedded AI agents.",
+  "name": "FiscalAI — Debt Reduction Optimiser",
+  "short_name": "FiscalAI",
+  "description": "FiscalAI — Debt Reduction Optimiser — part of the Uganda Fiscal Intelligence Platform.",
   "start_url": "index.html",
   "scope": "/",
   "display": "standalone",
-  "orientation": "any",
   "background_color": "#08090c",
   "theme_color": "#08090c",
   "icons": [

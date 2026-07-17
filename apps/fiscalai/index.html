@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FiscalAI Uganda — Debt Reduction Optimisation Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050608;--bg2:#090b10;--bg3:#0d1018;--bg4:#111520;
+  --bd:#161c2c;--bd2:#1e2640;
+  --t1:#d8e4ff;--t2:#5068a0;--t3:#202840;
+  --cyan:#00e8d0;--cy-bg:#001a18;--cy-bd:#005850;
+  --gold:#f0c840;--go-bg:#181000;--go-bd:#484000;
+  --red:#ff4848;--re-bg:#180000;--re-bd:#500000;
+  --green:#30e870;--gr-bg:#001408;--gr-bd:#005028;
+  --blue:#3888ff;--bl-bg:#000c28;--bl-bd:#082068;
+  --orange:#ff8838;--or-bg:#180800;--or-bd:#502800;
+  --purple:#b848ff;--pu-bg:#100018;--pu-bd:#400060;
+  --sans:'Space Grotesk',sans-serif;--mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--t1);min-height:100vh;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sb{width:242px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;}
+.brand{padding:20px 18px 14px;border-bottom:1px solid var(--bd);}
+.b-ai{font-size:9px;color:var(--cyan);text-transform:uppercase;letter-spacing:.16em;font-family:var(--mono);margin-bottom:3px;}
+.b-name{font-size:19px;font-weight:700;color:var(--t1);letter-spacing:-.04em;}
+.b-sub{font-size:9.5px;color:var(--t3);margin-top:2px;}
+.ai-status{margin:10px 12px 4px;background:linear-gradient(135deg,var(--cy-bg),#001a10);border:1px solid var(--cy-bd);border-radius:7px;padding:8px 11px;display:flex;align-items:center;gap:8px;}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);animation:pulse 2s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #00e8d088}50%{box-shadow:0 0 0 6px #00e8d000}}
+.ai-text{font-size:11px;color:var(--cyan);}
+.nav{padding:8px 10px;flex:1;overflow-y:auto;}
+.ns{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);padding:10px 10px 4px;}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:12.5px;color:var(--t2);margin-bottom:1px;transition:all .15s;}
+.ni:hover{background:var(--bg3);color:var(--t1);}
+.ni.active{background:var(--cy-bg);color:var(--cyan);}
+.sb-engine{margin:8px 12px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;padding:10px 12px;}
+.se-r{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px;}
+.se-r:last-child{margin-bottom:0;}
+.se-v{color:var(--cyan);font-weight:700;font-family:var(--mono);}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;}
+.page{display:none;padding:26px 30px;}
+.page.active{display:block;}
+.pt{font-size:22px;font-weight:700;letter-spacing:-.05em;margin-bottom:3px;}
+.ps{font-size:12.5px;color:var(--t2);margin-bottom:22px;}
+
+/* STATS */
+.s4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.s3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.sc{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.sc-bar{position:absolute;top:0;left:0;right:0;height:2px;}
+.sc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:7px;font-family:var(--mono);}
+.sc-num{font-size:24px;font-weight:700;line-height:1;margin-bottom:3px;font-family:var(--mono);}
+.sc-note{font-size:11px;color:var(--t3);}
+.n-c{color:var(--cyan);}
+.n-g{color:var(--gold);}
+.n-r{color:var(--red);}
+.n-gr{color:var(--green);}
+.n-b{color:var(--blue);}
+.n-o{color:var(--orange);}
+.n-p{color:var(--purple);}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;}
+.ch{padding:12px 17px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px 10px 0 0;}
+.ch-t{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t2);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);font-weight:400;padding:9px 14px;text-align:left;border-bottom:1px solid var(--bd);background:var(--bg3);font-family:var(--mono);}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--bd);vertical-align:middle;font-size:12.5px;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--bg3);}
+.mono{font-family:var(--mono);font-size:11.5px;}
+
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;font-family:var(--mono);}
+.bc{background:var(--cy-bg);color:var(--cyan);border:1px solid var(--cy-bd);}
+.bg{background:var(--go-bg);color:var(--gold);border:1px solid var(--go-bd);}
+.br{background:var(--re-bg);color:var(--red);border:1px solid var(--re-bd);}
+.bgr{background:var(--gr-bg);color:var(--green);border:1px solid var(--gr-bd);}
+.bb{background:var(--bl-bg);color:var(--blue);border:1px solid var(--bl-bd);}
+.bo{background:var(--or-bg);color:var(--orange);border:1px solid var(--or-bd);}
+.bp{background:var(--pu-bg);color:var(--purple);border:1px solid var(--pu-bd);}
+.bn{background:var(--bg3);color:var(--t2);border:1px solid var(--bd);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .15s;}
+.btn-cyan{background:var(--cyan);color:#000;}
+.btn-cyan:hover{background:#00c0b0;}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-ghost{background:transparent;border:1px solid var(--bd);color:var(--t2);}
+.btn-ghost:hover{background:var(--bg3);color:var(--t1);}
+.btn-sm{padding:5px 10px;font-size:10.5px;}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+
+/* ALERTS */
+.al{border-radius:8px;padding:11px 14px;font-size:12.5px;line-height:1.5;margin-bottom:12px;}
+.al-c{background:var(--cy-bg);color:var(--cyan);border:1px solid var(--cy-bd);}
+.al-g{background:var(--go-bg);color:var(--gold);border:1px solid var(--go-bd);}
+.al-r{background:var(--re-bg);color:var(--red);border:1px solid var(--re-bd);}
+.al-gr{background:var(--gr-bg);color:var(--green);border:1px solid var(--gr-bd);}
+.al-b{background:var(--bl-bg);color:var(--blue);border:1px solid var(--bl-bd);}
+
+/* PANEL */
+.panel{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:20px 22px;}
+.p-title{font-size:15px;font-weight:700;margin-bottom:14px;letter-spacing:-.03em;}
+
+/* PROGRESS */
+.prog{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.prog-f{height:100%;border-radius:3px;}
+
+/* FORMS */
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg label{font-size:9.5px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.07em;font-family:var(--mono);}
+.fg input,.fg select{background:var(--bg3);border:1px solid var(--bd);border-radius:6px;padding:8px 11px;font-size:13px;color:var(--t1);font-family:var(--sans);outline:none;width:100%;transition:border-color .15s;}
+.fg input:focus,.fg select:focus{border-color:var(--cyan);}
+.fg input[type=range]{padding:4px 0;cursor:pointer;accent-color:var(--cyan);}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ALGO DISPLAY */
+.algo-terminal{background:#020304;border:1px solid var(--cy-bd);border-radius:10px;padding:16px;font-family:var(--mono);font-size:11.5px;line-height:1.9;overflow-x:auto;position:relative;}
+.at-header{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--cyan);margin-bottom:10px;border-bottom:1px solid var(--cy-bd);padding-bottom:6px;}
+.ak{color:var(--cyan);}
+.av{color:var(--green);}
+.as{color:var(--gold);}
+.an{color:var(--blue);}
+.ac{color:var(--t3);}
+.ao{color:var(--orange);}
+.cursor{display:inline-block;width:8px;height:14px;background:var(--cyan);animation:blink2 1s infinite;vertical-align:middle;}
+@keyframes blink2{0%,100%{opacity:1}50%{opacity:0}}
+
+/* INTERVENTION CARD */
+.int-card{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px;transition:border-color .2s;}
+.int-card:hover{border-color:var(--bd2);}
+.int-rank{font-size:28px;font-weight:700;color:var(--t3);width:32px;flex-shrink:0;text-align:right;font-family:var(--mono);line-height:1;}
+.int-name{font-size:13.5px;font-weight:600;margin-bottom:3px;}
+.int-desc{font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:6px;}
+.int-metrics{display:flex;gap:16px;}
+.im-val{font-size:14px;font-weight:700;font-family:var(--mono);}
+.im-lbl{font-size:9.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;}
+
+/* SCENARIO BUILDER */
+.scenario-box{background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:18px;}
+.sb-label{font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;}
+.sb-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--cyan);}
+
+/* NOTIF */
+.notif{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--cy-bd);color:var(--cyan);padding:12px 18px;border-radius:8px;font-size:13px;z-index:1000;display:none;box-shadow:0 8px 32px #000a;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:#000c;z-index:500;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;width:580px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px #000a;}
+.mh{padding:18px 22px 14px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;}
+.mh h3{font-size:16px;font-weight:700;}
+.mclose{background:none;border:none;color:var(--t2);cursor:pointer;font-size:20px;}
+.mb{padding:20px 22px;}
+.mf{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;}
+
+/* LOADING ANIMATION */
+.loading-dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cyan);margin:0 2px;animation:dot 1.4s infinite;}
+.loading-dots span:nth-child(2){animation-delay:.2s;}
+.loading-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes dot{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
+</style>
+<link rel="stylesheet" href="assets/responsive.css">
+</head>
+<body>
+<div class="app">
+
+<div class="sb">
+  <div class="brand">
+    <div class="b-ai">AI · Fiscal Intelligence</div>
+    <div class="b-name">FiscalAI</div>
+    <div class="b-sub">Debt Reduction Optimisation Engine</div>
+  </div>
+  <div class="ai-status">
+    <div class="ai-dot"></div>
+    <span class="ai-text">AI engine running · 847 variables loaded</span>
+  </div>
+  <nav class="nav">
+    <div class="ns">AI Engine</div>
+    <div class="ni active" onclick="nav('dash')">🤖 AI Dashboard</div>
+    <div class="ni" onclick="nav('algorithm')">⚙ Algorithm</div>
+    <div class="ni" onclick="nav('interventions')">🎯 Top Interventions</div>
+    <div class="ni" onclick="nav('scenario')">🔮 Scenario Builder</div>
+    <div class="ns">Analysis</div>
+    <div class="ni" onclick="nav('anomaly')">🔍 Anomaly Engine</div>
+    <div class="ni" onclick="nav('predict')">📈 Compliance Forecast</div>
+    <div class="ni" onclick="nav('momo')">📱 MoMo Tax Model</div>
+    <div class="ns">Reports</div>
+    <div class="ni" onclick="nav('report')">📋 Minister Report</div>
+  </nav>
+  <div class="sb-engine">
+    <div class="se-r"><span>Model Accuracy</span><span class="se-v">94.2%</span></div>
+    <div class="se-r"><span>Variables Tracked</span><span class="se-v">847</span></div>
+    <div class="se-r"><span>Businesses Scored</span><span class="se-v">89,420</span></div>
+    <div class="se-r"><span>Last Retrain</span><span class="se-v">Today 4AM</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dash">
+  <div class="pt">FiscalAI — Debt Reduction Engine</div>
+  <div class="ps">Ministry of Finance Uganda · AI-powered fiscal optimisation · Identifies the fastest path to debt reduction</div>
+
+  <div class="al-c" style="margin-bottom:20px">
+    🤖 <strong>AI Analysis Complete.</strong> Model has processed 89,420 taxpayer records, 3 years of EFRIS data, and Uganda's full debt portfolio. Top recommendation: <strong>Focus 60% of enforcement effort on invoice suppression in construction and manufacturing</strong> — highest debt-reduction ROI per shilling of enforcement cost.
+  </div>
+
+  <div class="s4">
+    <div class="sc"><div class="sc-bar" style="background:var(--cyan)"></div><div class="sc-lbl">Optimal Revenue Recovery</div><div class="sc-num n-c">UGX 2.2T</div><div class="sc-note">Achievable in 12 months</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--green)"></div><div class="sc-lbl">Debt-to-GDP Impact</div><div class="sc-num n-gr">-4.1%</div><div class="sc-note">51.3% → 47.2% by 2027</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--gold)"></div><div class="sc-lbl">AI Confidence Score</div><div class="sc-num n-g">94.2%</div><div class="sc-note">Based on historical data fit</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--blue)"></div><div class="sc-lbl">Interventions Modelled</div><div class="sc-num n-b">12</div><div class="sc-note">Ranked by ROI</div></div>
+  </div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ch-t">AI Top 3 Recommendations — This Quarter</div></div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:12px;padding:12px;background:var(--cy-bg);border-radius:8px;border:1px solid var(--cy-bd)">
+          <div style="font-size:24px;font-weight:700;color:var(--cyan);font-family:var(--mono);width:28px;flex-shrink:0">1</div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--cyan);margin-bottom:3px">Invoice Suppression — Construction</div><div style="font-size:12px;color:var(--t2)">38.7% compliance. 14,820 businesses. AI estimates UGX 480B in suppressed VAT. Target top 200 anomalies first.</div><div style="margin-top:5px"><span class="bdg bc">UGX 480B/year</span><span class="bdg bgr">ROI: 24x</span></div></div>
+        </div>
+        <div style="display:flex;gap:12px;padding:12px;background:var(--go-bg);border-radius:8px;border:1px solid var(--go-bd)">
+          <div style="font-size:24px;font-weight:700;color:var(--gold);font-family:var(--mono);width:28px;flex-shrink:0">2</div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:3px">Mobile Money Withholding Tax</div><div style="font-size:12px;color:var(--t2)">0.3% on MoMo transactions >UGX 100K. 27M accounts. Zero filing needed. Rwanda model proven.</div><div style="margin-top:5px"><span class="bdg bg">UGX 600B/year</span><span class="bdg bgr">ROI: 180x</span></div></div>
+        </div>
+        <div style="display:flex;gap:12px;padding:12px;background:var(--bl-bg);border-radius:8px;border:1px solid var(--bl-bd)">
+          <div style="font-size:24px;font-weight:700;color:var(--blue);font-family:var(--mono);width:28px;flex-shrink:0">3</div>
+          <div><div style="font-size:13px;font-weight:600;color:var(--blue);margin-bottom:3px">Dormant EFRIS Re-engagement</div><div style="font-size:12px;color:var(--t2)">4,821 dormant accounts. Automated SMS + field officer queue. 40% re-engagement = UGX 19B.</div><div style="margin-top:5px"><span class="bdg bb">UGX 19B/year</span><span class="bdg bgr">ROI: 48x</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><div class="ch-t">Optimal Enforcement Budget Allocation</div></div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Construction invoice suppression</span><span class="mono n-c">32%</span></div><div class="prog"><div class="prog-f" style="width:32%;background:var(--cyan)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Manufacturing anomalies</span><span class="mono n-c">24%</span></div><div class="prog"><div class="prog-f" style="width:24%;background:var(--cyan)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>VAT refund fraud investigation</span><span class="mono n-g">18%</span></div><div class="prog"><div class="prog-f" style="width:18%;background:var(--gold)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Dormant EFRIS re-engagement</span><span class="mono n-b">12%</span></div><div class="prog"><div class="prog-f" style="width:12%;background:var(--blue)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Real estate income tax</span><span class="mono n-o">8%</span></div><div class="prog"><div class="prog-f" style="width:8%;background:var(--orange)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>High-income individuals</span><span class="mono n-p">6%</span></div><div class="prog"><div class="prog-f" style="width:6%;background:var(--purple)"></div></div></div>
+        <div class="al-c" style="margin-top:6px;margin-bottom:0;font-size:12px">This allocation maximises debt-to-GDP reduction per UGX 1 spent on enforcement.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALGORITHM PAGE -->
+<div class="page" id="page-algorithm">
+  <div class="pt">The Optimisation Algorithm</div>
+  <div class="ps">How FiscalAI calculates the optimal revenue recovery strategy to minimise Uganda's debt-to-GDP ratio</div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div class="algo-terminal" style="margin-bottom:14px">
+        <div class="at-header">FISCALAI — DEBT REDUCTION OPTIMISER v2.4</div>
+        <div><span class="ac">// Objective: minimise debt-to-GDP over 5 years</span></div>
+        <div><span class="ak">MINIMISE</span>( Σ <span class="av">debt[t]</span> / <span class="av">GDP[t]</span> for t in <span class="an">1..5</span> )</div>
+        <div style="margin-top:8px"><span class="ac">// Revenue model</span></div>
+        <div><span class="av">revenue[t]</span> = <span class="an">27.3T</span> + Σ <span class="ao">yield[i]</span> × <span class="av">effort[i]</span></div>
+        <div style="margin-top:8px"><span class="ac">// Debt dynamics</span></div>
+        <div><span class="av">debt[t]</span> = <span class="av">debt[t-1]</span> × (<span class="an">1</span> + <span class="ao">r</span>) - <span class="av">primary_surplus[t]</span></div>
+        <div style="margin-top:8px"><span class="ac">// Constraints</span></div>
+        <div><span class="ak">SUBJECT TO</span>:</div>
+        <div>  Σ <span class="ao">cost[i]</span> × <span class="av">effort[i]</span> ≤ <span class="as">enforcement_budget</span></div>
+        <div>  <span class="av">effort[i]</span> ∈ [<span class="an">0</span>, <span class="an">1</span>] for all i</div>
+        <div>  <span class="av">political_feasibility[i]</span> ≥ <span class="an">0.3</span></div>
+        <div style="margin-top:8px"><span class="ac">// Result vector:</span></div>
+        <div><span class="av">OPTIMAL_EFFORT</span> = [</div>
+        <div>  invoice_suppression: <span class="an">0.85</span>, <span class="ac">// 85% max effort</span></div>
+        <div>  momo_withholding:   <span class="an">1.00</span>, <span class="ac">// 100% — highest ROI</span></div>
+        <div>  dormant_efris:      <span class="an">0.72</span>,</div>
+        <div>  vat_refund_fraud:   <span class="an">0.91</span>,</div>
+        <div>  trade_misinvoicing: <span class="an">0.40</span>, <span class="ac">// complex — lower effort</span></div>
+        <div>  real_estate_tax:    <span class="an">0.68</span></div>
+        <div>]</div>
+        <div style="margin-top:8px"><span class="ac">// Projected outcome:</span></div>
+        <div><span class="av">DEBT_TO_GDP_2027</span> = <span class="an">47.2%</span> <span class="ac">// down from 51.3%</span></div>
+        <div><span class="av">REVENUE_GAIN</span> = <span class="an">UGX 2.2T/year</span></div>
+        <div style="margin-top:6px">STATUS: <span class="av">OPTIMAL_SOLUTION_FOUND</span> <span class="cursor"></span></div>
+      </div>
+
+      <div class="algo-terminal">
+        <div class="at-header">ANOMALY DETECTION ENGINE — RANDOM FOREST MODEL</div>
+        <div><span class="ac">// Risk score formula for each taxpayer</span></div>
+        <div><span class="av">risk_score</span> = <span class="ak">weighted_avg</span>([</div>
+        <div>  (invoice_vs_sector_median,   <span class="an">0.25</span>),</div>
+        <div>  (employees_vs_revenue,       <span class="an">0.20</span>),</div>
+        <div>  (utility_consumption_ratio,  <span class="an">0.18</span>),</div>
+        <div>  (momo_volume_vs_declared,    <span class="an">0.17</span>),</div>
+        <div>  (property_vehicle_count,     <span class="an">0.12</span>),</div>
+        <div>  (round_number_invoice_rate,  <span class="an">0.08</span>)</div>
+        <div>])</div>
+        <div style="margin-top:6px"><span class="ac">// Today's results:</span></div>
+        <div><span class="av">CRITICAL</span> (score ≥ 90): <span class="an">24</span> businesses</div>
+        <div><span class="av">HIGH</span>     (score ≥ 70): <span class="an">38</span> businesses</div>
+        <div><span class="av">MEDIUM</span>   (score ≥ 50): <span class="an">65</span> businesses</div>
+        <div><span class="av">LOW</span>      (score &lt; 50): <span class="an">89,293</span> businesses</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" style="margin-bottom:14px">
+        <div class="p-title">How the AI is Trained</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:12.5px">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;background:var(--cy-bg);color:var(--cyan);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</div>
+            <div><strong style="color:var(--t1)">Training data:</strong><span style="color:var(--t2)"> 3 years of EFRIS transaction records (anonymised), external data sources (UNRA vehicles, URSB property, MoMo transaction volumes via MTN/Airtel API, KCCA business licences)</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;background:var(--cy-bg);color:var(--cyan);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</div>
+            <div><strong style="color:var(--t1)">Algorithm:</strong><span style="color:var(--t2)"> Random Forest classifier for anomaly detection (handles non-linear relationships). LSTM neural net for compliance churn prediction. Linear programming for budget optimisation.</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;background:var(--cy-bg);color:var(--cyan);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</div>
+            <div><strong style="color:var(--t1)">Validation:</strong><span style="color:var(--t2)"> Model retrained monthly on new EFRIS data. Back-tested against known fraud cases. Current accuracy: 94.2% (true positive rate for audit recommendations).</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;background:var(--cy-bg);color:var(--cyan);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">4</div>
+            <div><strong style="color:var(--t1)">Comparable systems:</strong><span style="color:var(--t2)"> Greece IAPR (hidden pattern detection), India Income Tax AI (charitable donation skew), Australia ATO (audit time reduction 80%), Rwanda MoMo tax engine (UGX equivalent billions captured year 1).</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="p-title">Data Sources Integrated</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span class="bdg bc">URA EFRIS (3yr)</span>
+          <span class="bdg bg">UNRA Vehicle Registry</span>
+          <span class="bdg bb">URSB Property Register</span>
+          <span class="bdg bgr">MTN MoMo Volumes</span>
+          <span class="bdg bgr">Airtel Money Volumes</span>
+          <span class="bdg bo">KCCA Business Licences</span>
+          <span class="bdg bp">Uganda Customs (URA)</span>
+          <span class="bdg bc">UN Comtrade Prices</span>
+          <span class="bdg bn">Social Media Business Data</span>
+          <span class="bdg bn">Utility Bills (UMEME)</span>
+        </div>
+        <p style="font-size:12px;color:var(--t2);margin-top:10px;line-height:1.6">All personal data processed under Uganda's Data Protection and Privacy Act 2019. Individual identities masked. AI works on anonymised taxpayer IDs. Human officers required for all audit actions.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INTERVENTIONS PAGE -->
+<div class="page" id="page-interventions">
+  <div class="pt">Ranked Intervention Portfolio</div>
+  <div class="ps">All 12 revenue interventions ranked by debt-reduction ROI — highest impact per shilling of enforcement cost</div>
+
+  <div class="al-c" style="margin-bottom:18px">
+    🤖 AI recommendation: Concentrate 80% of enforcement resources on interventions ranked 1–4. They account for 91% of recoverable revenue at 76% lower cost than treating all interventions equally.
+  </div>
+
+  <div id="intervention-list"></div>
+</div>
+
+<!-- SCENARIO BUILDER -->
+<div class="page" id="page-scenario">
+  <div class="pt">Fiscal Scenario Builder</div>
+  <div class="ps">Adjust parameters and see how Uganda's debt-to-GDP changes — in real time</div>
+
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="panel">
+        <div class="p-title">🔧 Adjust Scenario Parameters</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="fg">
+            <label>EFRIS Compliance Rate Target (%)</label>
+            <input type="range" id="sl-compliance" min="48" max="90" value="65" oninput="updateScenario()">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)"><span>Current: 48%</span><span id="sl-compliance-val" style="color:var(--cyan)">65%</span><span>Target: 90%</span></div>
+          </div>
+          <div class="fg">
+            <label>Mobile Money Withholding Rate (%)</label>
+            <input type="range" id="sl-momo" min="0" max="1" step="0.1" value="0.3" oninput="updateScenario()">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)"><span>None: 0%</span><span id="sl-momo-val" style="color:var(--cyan)">0.3%</span><span>Max: 1%</span></div>
+          </div>
+          <div class="fg">
+            <label>Anomaly Audit Coverage (% of flagged)</label>
+            <input type="range" id="sl-audit" min="0" max="100" value="60" oninput="updateScenario()">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)"><span>0%</span><span id="sl-audit-val" style="color:var(--cyan)">60%</span><span>100%</span></div>
+          </div>
+          <div class="fg">
+            <label>GDP Growth Rate (%/year)</label>
+            <input type="range" id="sl-gdp" min="3" max="8" step="0.5" value="5.5" oninput="updateScenario()">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)"><span>3%</span><span id="sl-gdp-val" style="color:var(--cyan)">5.5%</span><span>8%</span></div>
+          </div>
+          <div class="fg">
+            <label>New Borrowing Reduction (%)</label>
+            <input type="range" id="sl-borrow" min="0" max="50" value="20" oninput="updateScenario()">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)"><span>No change</span><span id="sl-borrow-val" style="color:var(--cyan)">20% less</span><span>50% less</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="g2" style="margin-bottom:0">
+        <div class="scenario-box">
+          <div class="sb-label">Additional Revenue / Year</div>
+          <div class="sb-val" id="sc-revenue">UGX 1.87T</div>
+        </div>
+        <div class="scenario-box">
+          <div class="sb-label">Debt-to-GDP 2028</div>
+          <div class="sb-val" id="sc-debt" style="color:var(--green)">47.8%</div>
+        </div>
+        <div class="scenario-box">
+          <div class="sb-label">Revenue Growth</div>
+          <div class="sb-val" id="sc-growth">+6.8%</div>
+        </div>
+        <div class="scenario-box">
+          <div class="sb-label">Debt Reduction</div>
+          <div class="sb-val" id="sc-reduction" style="color:var(--green)">-3.5pp</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="p-title">Scenario Projection — 5 Years</div>
+        <div style="display:flex;flex-direction:column;gap:10px" id="sc-projection"></div>
+      </div>
+
+      <div class="panel">
+        <div class="p-title">AI Assessment</div>
+        <div id="sc-assessment" style="font-size:12.5px;color:var(--t2);line-height:1.7">
+          This scenario is <strong style="color:var(--cyan)">moderately ambitious</strong>. With 65% EFRIS compliance, 0.3% MoMo withholding, and 60% audit coverage, Uganda generates an additional UGX 1.87 trillion annually. Debt-to-GDP falls to 47.8% by 2028. <strong style="color:var(--t1)">This is achievable within 24 months</strong> if enforcement begins now.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANOMALY ENGINE -->
+<div class="page" id="page-anomaly">
+  <div class="pt">Anomaly Detection Engine</div>
+  <div class="ps">Machine learning model scoring all 89,420 EFRIS-registered businesses — updated daily</div>
+
+  <div class="s4">
+    <div class="sc"><div class="sc-bar" style="background:var(--red)"></div><div class="sc-lbl">Critical (Score ≥90)</div><div class="sc-num n-r">24</div><div class="sc-note">Immediate investigation</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--orange)"></div><div class="sc-lbl">High Risk (70–89)</div><div class="sc-num n-o">38</div><div class="sc-note">Priority audit queue</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--gold)"></div><div class="sc-lbl">Medium Risk (50–69)</div><div class="sc-num n-g">65</div><div class="sc-note">Monitor closely</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--green)"></div><div class="sc-lbl">Compliant (&lt;50)</div><div class="sc-num n-gr">89,293</div><div class="sc-note">No action needed</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ch-t">Top Anomaly Cases — AI Ranked</div><button class="btn btn-ghost btn-sm" onclick="showNotif('📋 Anomaly case files exported to URA investigation system')">Export to Investigators</button></div>
+    <table class="tbl">
+      <thead><tr><th>Business</th><th>TIN</th><th>Sector</th><th>AI Score</th><th>Declared Turnover</th><th>Estimated True Turnover</th><th>Tax Gap Est.</th><th>Flag Reason</th></tr></thead>
+      <tbody id="anomaly-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- COMPLIANCE FORECAST -->
+<div class="page" id="page-predict">
+  <div class="pt">Compliance Churn Prediction</div>
+  <div class="ps">LSTM neural network — predicts which currently-compliant businesses will stop filing in the next 60 days</div>
+
+  <div class="al-c" style="margin-bottom:18px">
+    🤖 Model detected <strong>312 businesses at high risk of going dormant</strong> in the next 60 days based on their EFRIS filing patterns. Early intervention (automated SMS + WhatsApp today) is 8x cheaper than re-engaging after they go dormant.
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ch-t">At-Risk Businesses — Next 60 Days</div><button class="btn btn-cyan btn-sm" onclick="sendPreventionMessages()">📱 Send Prevention Messages to All</button></div>
+    <table class="tbl">
+      <thead><tr><th>Business</th><th>District</th><th>Current Streak</th><th>Last Invoice</th><th>Churn Risk</th><th>Warning Signal</th><th>Action</th></tr></thead>
+      <tbody id="churn-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MOMO TAX -->
+<div class="page" id="page-momo">
+  <div class="pt">Mobile Money Tax Withholding Model</div>
+  <div class="ps">Revenue projection for automatic 0.3% withholding tax on MoMo transactions above UGX 100K — the highest ROI intervention available</div>
+
+  <div class="al-gr" style="margin-bottom:20px">
+    ✓ <strong>Rwanda precedent:</strong> Rwanda implemented MoMo transaction tax and collected equivalent of USD 180 million in year 1 with zero filing burden. Uganda has 3x more mobile money accounts than Rwanda. This is the single highest-ROI fiscal intervention available.
+  </div>
+
+  <div class="s3">
+    <div class="sc"><div class="sc-bar" style="background:var(--green)"></div><div class="sc-lbl">MTN Mobile Money Accounts</div><div class="sc-num n-gr">16.4M</div><div class="sc-note">Uganda · Active accounts</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--green)"></div><div class="sc-lbl">Airtel Money Accounts</div><div class="sc-num n-gr">11.2M</div><div class="sc-note">Uganda · Active accounts</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--cyan)"></div><div class="sc-lbl">Monthly MoMo Transactions</div><div class="sc-num n-c">UGX 24T</div><div class="sc-note">Total value monthly</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="panel">
+      <div class="p-title">Revenue Projection by Withholding Rate</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div><div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--gr-bg);border-radius:6px"><span>0.1% rate (minimal)</span><span class="mono n-gr">UGX 200B/year</span></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--gr-bg);border-radius:6px"><span style="color:var(--cyan);font-weight:600">0.3% rate (recommended)</span><span class="mono n-gr" style="font-weight:700">UGX 600B/year</span></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--go-bg);border-radius:6px"><span>0.5% rate (aggressive)</span><span class="mono n-g">UGX 1.0T/year</span></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--re-bg);border-radius:6px"><span>1.0% rate (Kenya model)</span><span class="mono n-r">UGX 2.0T/year (may reduce MoMo usage)</span></div></div>
+      </div>
+      <div class="al-c" style="margin-top:12px;margin-bottom:0;font-size:12px">AI recommendation: 0.3% is the optimal rate — maximises revenue while maintaining MoMo adoption. Kenya's 1.5% rate caused a 30% drop in MoMo usage in 2023. Don't repeat that mistake.</div>
+    </div>
+    <div class="panel">
+      <div class="p-title">Implementation Requirements</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:12.5px">
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--green)">✓</span><div><strong style="color:var(--t1)">MTN Uganda partnership</strong><br><span style="color:var(--t2)">API to withhold 0.3% at transaction time and remit to URA daily</span></div></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--green)">✓</span><div><strong style="color:var(--t1)">Airtel Money Uganda partnership</strong><br><span style="color:var(--t2)">Same API integration</span></div></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--gold)">⚡</span><div><strong style="color:var(--t1)">Bank of Uganda mandate</strong><br><span style="color:var(--t2)">Regulatory instrument requiring telcos to implement withholding</span></div></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--gold)">⚡</span><div><strong style="color:var(--t1)">URA real-time API</strong><br><span style="color:var(--t2)">Receive daily bulk remittances from MTN and Airtel, match to TIN</span></div></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--blue)">→</span><div><strong style="color:var(--t1)">We build:</strong><br><span style="color:var(--t2)">The middleware API that sits between MTN/Airtel and URA — handling deduction calculation, matching, and reconciliation</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MINISTER REPORT -->
+<div class="page" id="page-report">
+  <div class="pt">Minister's Briefing Report</div>
+  <div class="ps">Auto-generated monthly fiscal intelligence summary for the Minister of Finance</div>
+  <div class="al-c" style="margin-bottom:18px">📋 This report is automatically generated on the 1st of every month and delivered to the Minister of Finance, Secretary to the Treasury, and URA Commissioner General.</div>
+  <div class="panel">
+    <div style="font-size:14px;font-weight:600;margin-bottom:4px">FISCAL INTELLIGENCE BRIEFING — MAY 2025</div>
+    <div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:20px">Prepared by FiscalAI · Classification: CONFIDENTIAL</div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div><div style="font-size:12px;font-weight:600;color:var(--cyan);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">1. CURRENT FISCAL POSITION</div><div style="font-size:13px;color:var(--t2);line-height:1.7">Total public debt stands at UGX 116.2 trillion (51.3% of GDP). Revenue collected in May was UGX 2.24 trillion against a target of UGX 2.41 trillion — a shortfall of UGX 167 billion. EFRIS compliance rate remains at 48.5%. 127 high-risk anomaly cases have been identified this month representing an estimated UGX 84 billion in at-risk tax revenue.</div></div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">2. AI-IDENTIFIED PRIORITY ACTIONS</div><div style="font-size:13px;color:var(--t2);line-height:1.7">(1) Deploy field investigators to top 24 critical anomaly businesses this month — estimated recovery UGX 18–42 billion. (2) Formally propose Mobile Money withholding tax (0.3%) to Parliament for implementation from FY 2026/27 — projected UGX 600 billion annually. (3) Activate dormant EFRIS re-engagement campaign for 4,821 inactive businesses — automated SMS has been prepared and can be deployed immediately.</div></div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">3. DEBT REDUCTION PATHWAY</div><div style="font-size:13px;color:var(--t2);line-height:1.7">If all three priority actions above are implemented before December 2025, FiscalAI models project: additional revenue of UGX 660 billion by end of FY 2025/26; debt-to-GDP ratio falling to 49.8% by June 2026; and a trajectory to reach 45% by 2029 — well within the government's medium-term fiscal framework target.</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px">
+      <button class="btn btn-cyan btn-sm" onclick="showNotif('✓ Report submitted to Minister of Finance and Secretary to Treasury')">Submit to Minister</button>
+      <button class="btn btn-ghost btn-sm" onclick="showNotif('📥 PDF briefing downloaded')">Download PDF</button>
+    </div>
+  </div>
+</div>
+
+</div></div>
+<div class="notif" id="notif"></div>
+
+<script>
+const interventions=[
+  {rank:1,name:'Mobile Money Withholding Tax',desc:'0.3% automatic deduction on MoMo transactions >UGX 100K. No filing. 27M accounts. Rwanda proven.',revenue:'UGX 600B/yr',roi:'180x',cost:'UGX 3.3B',time:'12 months',color:'var(--green)',badge:'bgr'},
+  {rank:2,name:'Construction Invoice Suppression',desc:'38.7% compliance. AI flags 200 high-anomaly businesses. Field investigators to top 50 first.',revenue:'UGX 480B/yr',roi:'24x',cost:'UGX 20B',time:'6 months',color:'var(--cyan)',badge:'bc'},
+  {rank:3,name:'Manufacturing Anomalies',desc:'72% compliance but large businesses. Top 24 critical anomalies = UGX 18-42B in one quarter.',revenue:'UGX 280B/yr',roi:'18x',cost:'UGX 15B',time:'4 months',color:'var(--cyan)',badge:'bc'},
+  {rank:4,name:'VAT Refund Fraud Prevention',desc:'Real-time validation engine blocks false refunds before payment. Saves UGX 200-400B annually.',revenue:'UGX 320B/yr',roi:'12x',cost:'UGX 26B',time:'8 months',color:'var(--gold)',badge:'bg'},
+  {rank:5,name:'Dormant EFRIS Re-engagement',desc:'4,821 accounts. Automated SMS + field officer queue. 40% response rate modelled.',revenue:'UGX 48B/yr',roi:'48x',cost:'UGX 1B',time:'2 months',color:'var(--blue)',badge:'bb'},
+  {rank:6,name:'Real Estate Income Tax',desc:'Property owners with 5+ properties and minimal income tax. Wealth-income mismatch model.',revenue:'UGX 180B/yr',roi:'8x',cost:'UGX 22B',time:'18 months',color:'var(--orange)',badge:'bo'},
+  {rank:7,name:'High-Net-Worth Individual Tax',desc:'Lifestyle vs declared income scoring. Multiple vehicles, properties, large MoMo volumes.',revenue:'UGX 140B/yr',roi:'6x',cost:'UGX 23B',time:'18 months',color:'var(--orange)',badge:'bo'},
+  {rank:8,name:'Mining Royalties Enforcement',desc:'Mineral under-invoicing. Gold smuggling cross-border. Requires geological survey data integration.',revenue:'UGX 840B/yr',roi:'3x',cost:'UGX 280B',time:'3 years',color:'var(--red)',badge:'br'},
+  {rank:9,name:'Accommodation & Food Sector',desc:'21.8% compliance. 18,000 registered. Targeted campaigns + simplified EFRIS Bridge option.',revenue:'UGX 96B/yr',roi:'5x',cost:'UGX 19B',time:'12 months',color:'var(--orange)',badge:'bo'},
+  {rank:10,name:'Trade Mis-invoicing (Customs AI)',desc:'Import value cross-match vs UN Comtrade. Complex. Requires EAC data-sharing MOU.',revenue:'UGX 2T/yr (long-term)',roi:'2x (high cost)',cost:'UGX 1T',time:'5 years',color:'var(--red)',badge:'br'},
+];
+
+const anomalyData=[
+  {biz:'Kampala Steel Fab',tin:'1002341876',sector:'Mfg',score:96,declared:'UGX 8.4M/mo',est:'UGX 184M/mo',gap:'UGX 3.2B/yr',flag:'Headcount vs revenue'},
+  {biz:'Arua Border Traders',tin:'1008742341',sector:'Wholesale',score:84,declared:'UGX 4.2M/mo',est:'UGX 84M/mo',gap:'UGX 840M/yr',flag:'Volume drop 95%'},
+  {biz:'Kampala ICT Services',tin:'1004821034',sector:'ICT',score:78,declared:'UGX 12M/mo',est:'UGX 48M/mo',gap:'UGX 432M/yr',flag:'VAT refund anomaly'},
+  {biz:'Gulu Construction Co',tin:'1006234512',sector:'Const',score:74,declared:'UGX 6.8M/mo',est:'UGX 42M/mo',gap:'UGX 422M/yr',flag:'Invoice suppression'},
+  {biz:'Nakasero Real Estate',tin:'1002345678',sector:'Real Est',score:71,declared:'UGX 2.1M/mo',est:'UGX 28M/mo',gap:'UGX 310M/yr',flag:'Property vs income'},
+];
+
+const churnData=[
+  {biz:'Masaka Wholesalers',dist:'Masaka',streak:'48 days',last:'3 days ago',risk:87,signal:'Filing gap widening'},
+  {biz:'Ntinda Electronics',dist:'Kampala',streak:'31 days',last:'8 days ago',risk:81,signal:'Missed 2 weekly cycles'},
+  {biz:'Gulu Hardware Ltd',dist:'Gulu',streak:'64 days',last:'5 days ago',risk:74,signal:'Unusual invoice gap'},
+  {biz:'Mbale Agro Traders',dist:'Mbale',streak:'22 days',last:'12 days ago',risk:69,signal:'Pattern broken'},
+  {biz:'Arua Fuel Station',dist:'Arua',streak:'89 days',last:'9 days ago',risk:65,signal:'Consistent late filing'},
+];
+
+function renderInterventions(){
+  document.getElementById('intervention-list').innerHTML=interventions.map(i=>`
+    <div class="int-card" style="border-color:${i.rank<=4?i.color+'40':'var(--bd)'}">
+      <div class="int-rank" style="color:${i.rank<=4?i.color:'var(--t3)'}">${i.rank}</div>
+      <div style="flex:1">
+        <div class="int-name">${i.name}</div>
+        <div class="int-desc">${i.desc}</div>
+        <div class="int-metrics">
+          <div><div class="im-val" style="color:${i.color}">${i.revenue}</div><div class="im-lbl">Annual Revenue</div></div>
+          <div><div class="im-val" style="color:var(--green)">${i.roi}</div><div class="im-lbl">ROI</div></div>
+          <div><div class="im-val">${i.cost}</div><div class="im-lbl">Enforcement Cost</div></div>
+          <div><div class="im-val">${i.time}</div><div class="im-lbl">Time to Revenue</div></div>
+        </div>
+      </div>
+      <span class="bdg ${i.badge}" style="margin-left:10px;flex-shrink:0">#${i.rank}</span>
+    </div>`).join('');
+}
+
+function renderAnomalyTable(){
+  document.getElementById('anomaly-table').innerHTML=anomalyData.map(a=>`
+    <tr>
+      <td style="font-weight:600">${a.biz}</td>
+      <td class="mono">${a.tin}</td>
+      <td>${a.sector}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${a.score}%;background:${a.score>=90?'var(--red)':a.score>=70?'var(--orange)':'var(--gold)'}"></div></div><span class="mono" style="color:${a.score>=90?'var(--red)':a.score>=70?'var(--orange)':'var(--gold)'};font-size:12px;font-weight:700">${a.score}</span></div></td>
+      <td class="mono">${a.declared}</td>
+      <td class="mono" style="color:var(--cyan)">${a.est}</td>
+      <td class="mono" style="color:var(--red)">${a.gap}</td>
+      <td><span class="bdg ${a.score>=90?'br':a.score>=70?'bo':'bg'}">${a.flag}</span></td>
+    </tr>`).join('');
+}
+
+function renderChurnTable(){
+  document.getElementById('churn-table').innerHTML=churnData.map(c=>`
+    <tr>
+      <td style="font-weight:600">${c.biz}</td>
+      <td>${c.dist}</td>
+      <td class="mono">${c.streak}</td>
+      <td class="mono" style="color:var(--gold)">${c.last}</td>
+      <td><span style="color:${c.risk>=80?'var(--red)':c.risk>=70?'var(--orange)':'var(--gold)'};font-weight:700;font-family:var(--mono)">${c.risk}%</span></td>
+      <td style="font-size:12px;color:var(--t2)">${c.signal}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="showNotif('📱 Prevention message sent to ${c.biz}')">Send Now</button></td>
+    </tr>`).join('');
+}
+
+function updateScenario(){
+  const compliance=parseFloat(document.getElementById('sl-compliance').value);
+  const momo=parseFloat(document.getElementById('sl-momo').value);
+  const audit=parseFloat(document.getElementById('sl-audit').value);
+  const gdp=parseFloat(document.getElementById('sl-gdp').value);
+  const borrow=parseFloat(document.getElementById('sl-borrow').value);
+
+  document.getElementById('sl-compliance-val').textContent=compliance+'%';
+  document.getElementById('sl-momo-val').textContent=momo.toFixed(1)+'%';
+  document.getElementById('sl-audit-val').textContent=audit+'%';
+  document.getElementById('sl-gdp-val').textContent=gdp+'%';
+  document.getElementById('sl-borrow-val').textContent=borrow+'% less';
+
+  const efrisRevenue=(compliance-48)*0.08; // T per compliance point
+  const momoRevenue=momo*2.0; // T per 0.1% rate
+  const auditRevenue=audit*0.012; // T per audit pct
+  const totalExtra=efrisRevenue+momoRevenue+auditRevenue;
+  const debtReduction=totalExtra*0.8+borrow*0.06;
+  const newDebtGDP=51.3-debtReduction+(5.3-gdp)*0.4;
+
+  document.getElementById('sc-revenue').textContent='UGX '+totalExtra.toFixed(2)+'T';
+  document.getElementById('sc-debt').textContent=Math.max(38,newDebtGDP).toFixed(1)+'%';
+  document.getElementById('sc-debt').style.color=newDebtGDP<47?'var(--green)':newDebtGDP<51?'var(--gold)':'var(--red)';
+  document.getElementById('sc-growth').textContent='+'+((totalExtra/27.3)*100).toFixed(1)+'%';
+  document.getElementById('sc-reduction').textContent='-'+(51.3-Math.max(38,newDebtGDP)).toFixed(1)+'pp';
+
+  const proj=[
+    {year:'2025',val:51.3},
+    {year:'2026',val:51.3-debtReduction*0.3},
+    {year:'2027',val:51.3-debtReduction*0.7},
+    {year:'2028',val:Math.max(38,newDebtGDP)},
+    {year:'2029',val:Math.max(36,newDebtGDP-2)},
+  ];
+  const max=Math.max(...proj.map(p=>p.val));
+  document.getElementById('sc-projection').innerHTML=proj.map(p=>`
+    <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${p.year}</span><span class="mono" style="color:${p.val<45?'var(--green)':p.val<50?'var(--gold)':'var(--red)'}">${p.val.toFixed(1)}% debt-to-GDP</span></div><div class="prog"><div class="prog-f" style="width:${Math.round(p.val/max*100)}%;background:${p.val<45?'var(--green)':p.val<50?'var(--gold)':'var(--red)'}"></div></div></div>`).join('');
+}
+
+function sendPreventionMessages(){showNotif('📱 Prevention messages sent to all 312 at-risk businesses via MTN/Airtel SMS');}
+
+function nav(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  const pages=['dash','algorithm','interventions','scenario','anomaly','predict','momo','report'];
+  document.querySelectorAll('.ni')[pages.indexOf(p)]?.classList.add('active');
+  if(p==='interventions') renderInterventions();
+  if(p==='anomaly') renderAnomalyTable();
+  if(p==='predict') renderChurnTable();
+}
+
+function showNotif(msg){const n=document.getElementById('notif');n.textContent=msg;n.style.display='block';clearTimeout(window._nt);window._nt=setTimeout(()=>n.style.display='none',3500);}
+updateScenario();
+</script>
+<script>window.UFP={product:"fiscalai",api:"https://uganda-fiscal-platform-api.onrender.com"};</script>
+<script src="assets/platform.js"></script>
+</body>
+</html>

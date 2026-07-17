@@ -123,6 +123,8 @@ const PRODUCTS = {
 // ---- In-memory stores (swap for a DB when needed) ----
 const demoRequests = [];
 const contactMessages = [];
+const store = {};   // per-product data collections: store[product][collection] = [records]
+const events = [];  // cross-app collaboration feed
 
 // ---- Routes ----
 app.get('/health', (req, res) => {
@@ -204,6 +206,61 @@ app.post('/api/agent', async (req, res) => {
     console.error('agent error', err.message);
     res.status(500).json({ error: 'agent failure' });
   }
+});
+
+// ---- Per-app data storage (each app keeps its own records) ----
+const okName = s => /^[a-z0-9-]{1,40}$/.test(s);
+
+app.get('/api/store/:product/:collection', (req, res) => {
+  const { product, collection } = req.params;
+  if (!okName(product) || !okName(collection)) return res.status(400).json({ error: 'bad name' });
+  res.json(((store[product] || {})[collection]) || []);
+});
+
+app.post('/api/store/:product/:collection', (req, res) => {
+  const { product, collection } = req.params;
+  if (!okName(product) || !okName(collection)) return res.status(400).json({ error: 'bad name' });
+  store[product] = store[product] || {};
+  const col = store[product][collection] = store[product][collection] || [];
+  if (col.length >= 5000) col.shift();
+  const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), ...req.body, _at: new Date().toISOString() };
+  col.push(rec);
+  res.json(rec);
+});
+
+app.delete('/api/store/:product/:collection/:id', (req, res) => {
+  const { product, collection, id } = req.params;
+  const col = (store[product] || {})[collection];
+  if (!col) return res.status(404).json({ error: 'not found' });
+  const i = col.findIndex(r => r.id === id);
+  if (i < 0) return res.status(404).json({ error: 'not found' });
+  col.splice(i, 1);
+  res.json({ ok: true });
+});
+
+// ---- Cross-app collaboration feed ----
+// Any app can publish an event (e.g. GuardPost publishes a fraud alert,
+// CreditTrack publishes an over-limit distributor). Every other app can read
+// the feed and react — this is how the 15 separate apps work as a team.
+app.post('/api/events', (req, res) => {
+  const { product = 'unknown', type = 'info', title = '', detail = '' } = req.body || {};
+  if (events.length >= 2000) events.shift();
+  const ev = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    product: String(product).slice(0, 40), type: String(type).slice(0, 30),
+    title: String(title).slice(0, 200), detail: String(detail).slice(0, 1000),
+    at: new Date().toISOString()
+  };
+  events.push(ev);
+  res.json(ev);
+});
+
+app.get('/api/events', (req, res) => {
+  const since = req.query.since ? Date.parse(req.query.since) : 0;
+  const forProduct = req.query.product;
+  let out = events.filter(e => Date.parse(e.at) > since);
+  if (forProduct) out = out.filter(e => e.product === forProduct);
+  res.json(out.slice(-100));
 });
 
 app.post('/api/demo', (req, res) => {
