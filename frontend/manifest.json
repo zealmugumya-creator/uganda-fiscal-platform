@@ -1,0 +1,21 @@
+{
+  "name": "Uganda Fiscal Intelligence Platform",
+  "short_name": "UgandaFiscal",
+  "description": "15 products fighting tax evasion, fraud and fiscal waste in Uganda — with embedded AI agents.",
+  "start_url": "index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#08090c",
+  "theme_color": "#08090c",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "TaxLink — EFRIS Compliance", "url": "efris-compliance-manager.html", "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }] },
+    { "name": "GuardPost — Fraud Detection", "url": "warehouse-fraud-detection.html", "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }] },
+    { "name": "DebtWatch Uganda", "url": "debtwatch-uganda.html", "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }] },
+    { "name": "FiscalAI", "url": "fiscalai.html", "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

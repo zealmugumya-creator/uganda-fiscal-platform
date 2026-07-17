@@ -193,6 +193,41 @@
     return pre + 'I’m the ' + me.agent + '. I can explain features, pricing, EFRIS rules, and how ' + me.name + ' fits with the other 14 products. Could you rephrase or ask something more specific?';
   }
 
+  /* ---------- installable app (PWA) ---------- */
+  if (!document.querySelector('link[rel="manifest"]')) {
+    var mf = document.createElement('link');
+    mf.rel = 'manifest';
+    mf.href = 'manifest.json';
+    document.head.appendChild(mf);
+  }
+  if (!document.querySelector('meta[name="theme-color"]')) {
+    var tc = document.createElement('meta');
+    tc.name = 'theme-color';
+    tc.content = '#08090c';
+    document.head.appendChild(tc);
+  }
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  }
+  var deferredInstall = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredInstall = e;
+    if (document.getElementById('ufp-install')) return;
+    var btn = document.createElement('button');
+    btn.id = 'ufp-install';
+    btn.className = 'ufp-back';
+    btn.style.cssText = 'top:14px;right:14px;left:auto;border-color:#403800;color:#e8c040;';
+    btn.innerHTML = '&#8681; Install App';
+    btn.title = 'Install the Uganda Fiscal Platform as an app on this device';
+    btn.addEventListener('click', function () {
+      if (!deferredInstall) return;
+      deferredInstall.prompt();
+      deferredInstall.userChoice.then(function () { btn.remove(); deferredInstall = null; });
+    });
+    document.body.appendChild(btn);
+  });
+
   /* ---------- backend health ---------- */
   function ping() {
     if (!API) return;
