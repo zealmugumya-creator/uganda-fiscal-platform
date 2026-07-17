@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerCost Uganda — Energy & Downtime Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0d08;--bg2:#131408;--bg3:#1a1c10;--bg4:#212414;
+  --bd:#2a2e18;--bd2:#383e22;
+  --t1:#e8ecd0;--t2:#7a8050;--t3:#3a4020;
+  --lime:#c8f020;--li-bg:#141a00;--li-bd:#3a5000;
+  --orange:#ff7020;--or-bg:#1a0800;--or-bd:#502010;
+  --red:#ff3020;--re-bg:#1a0400;--re-bd:#501000;
+  --blue:#20c0f0;--bl-bg:#00141a;--bl-bd:#105060;
+  --amber:#f0a020;--am-bg:#180e00;--am-bd:#503000;
+  --sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif;--mono:'Share Tech Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--t1);min-height:100vh;font-size:13px;}
+.app{display:flex;height:100vh;overflow:hidden;}
+.sb{width:230px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;}
+.brand{padding:20px 18px 14px;border-bottom:1px solid var(--bd);}
+.b-name{font-family:var(--cond);font-size:22px;font-weight:700;color:var(--lime);letter-spacing:.02em;}
+.b-tag{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.14em;font-family:var(--mono);margin-top:1px;}
+.client-box{margin:10px 12px 4px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;padding:9px 11px;}
+.cn{font-size:12px;font-weight:700;color:var(--t1);}
+.cs{font-size:10px;color:var(--t3);margin-top:1px;}
+.nav{padding:8px 10px;flex:1;overflow-y:auto;}
+.ns{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);padding:10px 10px 4px;font-family:var(--mono);}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:12.5px;color:var(--t2);margin-bottom:1px;transition:all .15s;}
+.ni:hover{background:var(--bg3);color:var(--t1);}
+.ni.active{background:var(--li-bg);color:var(--lime);}
+.nb{margin-left:auto;font-size:9.5px;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;}
+.sb-meter{margin:8px 12px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;padding:10px 12px;}
+.sm-row{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px;}
+.sm-row:last-child{margin-bottom:0;}
+.sm-v{color:var(--lime);font-weight:700;font-family:var(--mono);}
+.main{flex:1;overflow-y:auto;}
+.page{display:none;padding:26px 30px;}
+.page.active{display:block;}
+.pt{font-family:var(--cond);font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:3px;}
+.ps{font-size:12.5px;color:var(--t2);margin-bottom:22px;}
+/* Stats */
+.s4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.s3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.sc{background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:14px 16px;position:relative;overflow:hidden;}
+.sc-bar{position:absolute;top:0;left:0;right:0;height:2px;}
+.sc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:7px;font-family:var(--mono);}
+.sc-num{font-family:var(--cond);font-size:28px;font-weight:700;line-height:1;margin-bottom:3px;letter-spacing:.01em;}
+.sc-note{font-size:11px;color:var(--t3);}
+.n-l{color:var(--lime);}
+.n-o{color:var(--orange);}
+.n-r{color:var(--red);}
+.n-b{color:var(--blue);}
+.n-a{color:var(--amber);}
+/* Cards */
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:9px;}
+.ch{padding:11px 17px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:9px 9px 0 0;}
+.ch-t{font-family:var(--cond);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t2);}
+/* Table */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);font-weight:400;padding:9px 14px;text-align:left;border-bottom:1px solid var(--bd);background:var(--bg3);font-family:var(--mono);}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--bd);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--bg3);}
+.mono{font-family:var(--mono);font-size:11.5px;}
+/* Badges */
+.bdg{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;font-family:var(--mono);}
+.bl{background:var(--li-bg);color:var(--lime);border:1px solid var(--li-bd);}
+.bo{background:var(--or-bg);color:var(--orange);border:1px solid var(--or-bd);}
+.br{background:var(--re-bg);color:var(--red);border:1px solid var(--re-bd);}
+.bb{background:var(--bl-bg);color:var(--blue);border:1px solid var(--bl-bd);}
+.ba{background:var(--am-bg);color:var(--amber);border:1px solid var(--am-bd);}
+.bn{background:var(--bg3);color:var(--t2);border:1px solid var(--bd);}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:var(--cond);text-transform:uppercase;letter-spacing:.06em;transition:all .15s;}
+.btn-lime{background:var(--lime);color:#000;}
+.btn-lime:hover{background:#a8d010;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-ghost{background:transparent;border:1px solid var(--bd);color:var(--t2);}
+.btn-ghost:hover{background:var(--bg3);color:var(--t1);}
+.btn-sm{padding:5px 10px;font-size:10.5px;}
+/* Forms */
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg label{font-size:9.5px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.07em;font-family:var(--mono);}
+.fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--bd);border-radius:6px;padding:8px 11px;font-size:13px;color:var(--t1);font-family:var(--sans);outline:none;width:100%;transition:border-color .15s;}
+.fg input:focus,.fg select:focus{border-color:var(--lime);}
+.fg select option{background:var(--bg3);}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.full{grid-column:1/-1;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+/* Alert */
+.al{border-radius:7px;padding:11px 14px;font-size:12.5px;line-height:1.5;margin-bottom:12px;}
+.al-r{background:var(--re-bg);color:var(--red);border:1px solid var(--re-bd);}
+.al-g{background:var(--li-bg);color:var(--lime);border:1px solid var(--li-bd);}
+.al-a{background:var(--am-bg);color:var(--amber);border:1px solid var(--am-bd);}
+.al-b{background:var(--bl-bg);color:var(--blue);border:1px solid var(--bl-bd);}
+/* Panel */
+.panel{background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:20px 22px;}
+.p-title{font-family:var(--cond);font-size:16px;font-weight:700;margin-bottom:14px;letter-spacing:.02em;}
+/* Progress */
+.prog{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;}
+/* Line status */
+.line-card{background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:13px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;}
+.line-card.running{border-left:3px solid var(--lime);}
+.line-card.stopped{border-left:3px solid var(--red);animation:redFlash 2s infinite;}
+.line-card.generator{border-left:3px solid var(--amber);}
+@keyframes redFlash{0%,100%{border-color:var(--red)}50%{border-color:#ff8888}}
+.line-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.line-name{font-family:var(--cond);font-size:14px;font-weight:700;margin-bottom:2px;letter-spacing:.02em;}
+.line-meta{font-size:11.5px;color:var(--t2);}
+.line-stats{display:flex;gap:18px;margin-left:auto;text-align:right;}
+.ls-val{font-family:var(--mono);font-size:14px;font-weight:700;}
+.ls-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;}
+/* Big cost display */
+.big-cost{font-family:var(--cond);font-size:48px;font-weight:800;letter-spacing:.01em;line-height:1;}
+/* Generator gauge */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.gauge{width:120px;height:60px;position:relative;overflow:hidden;}
+.gauge svg{position:absolute;top:0;left:0;}
+.gauge-val{font-family:var(--mono);font-size:18px;font-weight:700;text-align:center;}
+/* Downtime log */
+.dt-row{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--bd);}
+.dt-row:last-child{border-bottom:none;}
+.dt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.dt-body{flex:1;}
+.dt-title{font-size:12.5px;font-weight:600;margin-bottom:2px;}
+.dt-sub{font-size:11.5px;color:var(--t2);}
+.dt-cost{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--red);flex-shrink:0;}
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:#000c;z-index:500;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;width:520px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px #0009;}
+.mh{padding:18px 22px 14px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;}
+.mh h3{font-family:var(--cond);font-size:18px;font-weight:700;}
+.mclose{background:none;border:none;color:var(--t2);cursor:pointer;font-size:20px;}
+.mb{padding:20px 22px;}
+.mf{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;}
+.notif{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--lime);color:var(--lime);padding:12px 18px;border-radius:8px;font-size:13px;z-index:1000;display:none;box-shadow:0 8px 32px #000a;font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="sb">
+  <div class="brand">
+    <div class="b-name">⚡ POWERCOST</div>
+    <div class="b-tag">Energy & Downtime Intelligence</div>
+  </div>
+  <div class="client-box">
+    <div class="cn">Steel & Tube Industries</div>
+    <div class="cs">Namanve Industrial Area · 8 production lines</div>
+  </div>
+  <nav class="nav">
+    <div class="ns">Live</div>
+    <div class="ni active" onclick="nav('dash')">⚡ Command Centre</div>
+    <div class="ni" onclick="nav('lines')">🏭 Production Lines</div>
+    <div class="ni" onclick="nav('log')">📋 Log Outage <span class="nb">!</span></div>
+    <div class="ns">Analysis</div>
+    <div class="ni" onclick="nav('cost')">💰 Cost Analysis</div>
+    <div class="ni" onclick="nav('trends')">📈 Trends</div>
+    <div class="ni" onclick="nav('generator')">🛢 Generator Tracker</div>
+    <div class="ns">Reports</div>
+    <div class="ni" onclick="nav('reports')">📊 MD Report</div>
+    <div class="ni" onclick="nav('uedcl')">⚡ UEDCL Claims</div>
+  </nav>
+  <div class="sb-meter">
+    <div class="sm-row"><span>Power Status</span><span class="sm-v" id="power-status">GRID ✓</span></div>
+    <div class="sm-row"><span>Lines Running</span><span class="sm-v">6 / 8</span></div>
+    <div class="sm-row"><span>Outages This Month</span><span class="sm-v" style="color:var(--red)">14</span></div>
+    <div class="sm-row"><span>Cost This Month</span><span class="sm-v" style="color:var(--orange)">UGX 28.4M</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- COMMAND CENTRE -->
+<div class="page active" id="page-dash">
+  <div class="pt">⚡ Power Command Centre</div>
+  <div class="ps">Steel & Tube Industries · Namanve · Real-time energy and downtime monitoring</div>
+
+  <div class="al-r" id="live-alert" style="margin-bottom:18px">
+    🔴 <strong>LIVE OUTAGE — LINE 4 (Heavy Rolling Mill)</strong> — Power cut at 14:22. Now 38 minutes down. Estimated loss so far: <strong>UGX 4,750,000.</strong> Generator 2 running. Alert sent to Plant Manager.
+  </div>
+
+  <div class="s4">
+    <div class="sc"><div class="sc-bar" style="background:var(--red)"></div><div class="sc-lbl">Live Outage Cost</div><div class="sc-num n-r" id="live-cost">UGX 4.75M</div><div class="sc-note">Line 4 · 38 min down</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--orange)"></div><div class="sc-lbl">Monthly Outage Cost</div><div class="sc-num n-o">UGX 28.4M</div><div class="sc-note">14 outages this month</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--amber)"></div><div class="sc-lbl">Generator Cost/Month</div><div class="sc-num n-a">UGX 18.2M</div><div class="sc-note">Diesel + maintenance</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--lime)"></div><div class="sc-lbl">Lines Running Now</div><div class="sc-num n-l">6/8</div><div class="sc-note">2 down · 1 on generator</div></div>
+  </div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <!-- Line status -->
+    <div class="card">
+      <div class="ch"><div class="ch-t">Production Line Status — Live</div><span class="bdg bl">● Live</span></div>
+      <div style="padding:12px 14px" id="line-status-mini"></div>
+    </div>
+
+    <!-- Cost counter -->
+    <div class="card">
+      <div class="ch"><div class="ch-t">Live Outage Cost Counter</div></div>
+      <div style="padding:20px;text-align:center">
+        <div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">Revenue lost — Line 4 outage</div>
+        <div class="big-cost n-r" id="cost-counter">UGX 4,750,000</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:8px;font-family:var(--mono)" id="counter-time">38 min · Started 14:22</div>
+        <div style="margin-top:16px">
+          <button class="btn btn-lime btn-sm" onclick="logRestore()">✓ Power Restored — Stop Counter</button>
+        </div>
+        <div style="margin-top:16px;font-size:11px;color:var(--t3)">Cost rate: UGX 125,000 per minute on Line 4</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ch-t">Today's Downtime Log</div><button class="btn btn-ghost btn-sm" onclick="nav('log')">Log New Outage</button></div>
+    <table class="tbl">
+      <thead><tr><th>Line</th><th>Start</th><th>End</th><th>Duration</th><th>Cause</th><th>Generator</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:700">Line 4 — Heavy Rolling</td><td class="mono">14:22</td><td class="mono n-r">ONGOING</td><td class="mono n-r">38+ min</td><td>UEDCL outage</td><td><span class="bdg ba">Gen 2 On</span></td><td class="mono n-r">UGX 4.75M+</td></tr>
+        <tr><td style="font-weight:700">Line 2 — Wire Drawing</td><td class="mono">09:14</td><td class="mono">09:47</td><td class="mono">33 min</td><td>UEDCL outage</td><td><span class="bdg bl">Gen 1</span></td><td class="mono n-o">UGX 3.96M</td></tr>
+        <tr><td style="font-weight:700">Line 6 — Tube Forming</td><td class="mono">07:30</td><td class="mono">07:52</td><td class="mono">22 min</td><td>UEDCL outage</td><td><span class="bdg bn">No gen</span></td><td class="mono n-o">UGX 1.76M</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PRODUCTION LINES -->
+<div class="page" id="page-lines">
+  <div class="pt">Production Lines</div>
+  <div class="ps">Real-time status of all 8 production lines</div>
+  <div id="line-cards"></div>
+</div>
+
+<!-- LOG OUTAGE -->
+<div class="page" id="page-log">
+  <div class="pt">Log Power Outage</div>
+  <div class="ps">Floor supervisor logs outage in real time. System calculates revenue loss automatically.</div>
+  <div class="g2">
+    <div class="panel" style="margin-bottom:14px">
+      <div class="p-title">⚡ New Outage Report</div>
+      <div class="f2" style="margin-bottom:14px">
+        <div class="fg full">
+          <label>Production Line Affected</label>
+          <select id="log-line" onchange="calcOutageCost()">
+            <option value="125000">Line 1 — Cold Rolling Mill (UGX 125K/min)</option>
+            <option value="125000">Line 4 — Heavy Rolling Mill (UGX 125K/min)</option>
+            <option value="80000">Line 2 — Wire Drawing (UGX 80K/min)</option>
+            <option value="60000">Line 3 — Pipe Extrusion (UGX 60K/min)</option>
+            <option value="90000">Line 5 — Galvanising (UGX 90K/min)</option>
+            <option value="70000">Line 6 — Tube Forming (UGX 70K/min)</option>
+          </select>
+        </div>
+        <div class="fg"><label>Outage Start Time</label><input type="time" id="log-start" value="14:22" oninput="calcOutageCost()"></div>
+        <div class="fg"><label>End Time (blank if ongoing)</label><input type="time" id="log-end" oninput="calcOutageCost()"></div>
+        <div class="fg"><label>Cause</label>
+          <select>
+            <option>UEDCL grid failure</option>
+            <option>Transformer fault</option>
+            <option>Internal wiring fault</option>
+            <option>Planned maintenance</option>
+            <option>Generator failure</option>
+          </select>
+        </div>
+        <div class="fg"><label>Generator Deployed?</label>
+          <select>
+            <option>Yes — Generator 1</option>
+            <option>Yes — Generator 2</option>
+            <option>No generator available</option>
+            <option>Generator failed to start</option>
+          </select>
+        </div>
+        <div class="fg"><label>Batches Affected</label><input placeholder="e.g. ST-2025-0847, ST-2025-0848"></div>
+        <div class="fg full"><label>Notes</label><textarea rows="2" placeholder="Any additional context..."></textarea></div>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="font-size:10px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Auto-calculated loss</div>
+        <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--red)" id="calc-cost">UGX 4,750,000</div>
+        <div style="font-size:11.5px;color:var(--t2);margin-top:3px" id="calc-detail">38 minutes × UGX 125,000/min</div>
+      </div>
+      <button class="btn btn-lime" style="width:100%;justify-content:center" onclick="logOutage()">Log Outage & Alert Management →</button>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="ch"><div class="ch-t">Line Cost Rates</div></div>
+        <table class="tbl">
+          <thead><tr><th>Line</th><th>Product</th><th>Cost/min</th><th>Cost/hr</th></tr></thead>
+          <tbody>
+            <tr><td>Line 1 — Cold Rolling</td><td>Steel sheets</td><td class="mono n-r">UGX 125K</td><td class="mono n-r">UGX 7.5M</td></tr>
+            <tr><td>Line 4 — Heavy Rolling</td><td>Steel bars</td><td class="mono n-r">UGX 125K</td><td class="mono n-r">UGX 7.5M</td></tr>
+            <tr><td>Line 5 — Galvanising</td><td>GI sheets</td><td class="mono n-o">UGX 90K</td><td class="mono n-o">UGX 5.4M</td></tr>
+            <tr><td>Line 2 — Wire Drawing</td><td>Wire rods</td><td class="mono n-o">UGX 80K</td><td class="mono n-o">UGX 4.8M</td></tr>
+            <tr><td>Line 6 — Tube Forming</td><td>Steel tubes</td><td class="mono n-a">UGX 70K</td><td class="mono n-a">UGX 4.2M</td></tr>
+            <tr><td>Line 3 — Pipe Extrusion</td><td>PVC/Steel pipe</td><td class="mono n-a">UGX 60K</td><td class="mono n-a">UGX 3.6M</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="al-b">ℹ Cost rates are based on: hourly production capacity × product selling price ÷ 60. Includes raw material waste during restart.</div>
+    </div>
+  </div>
+</div>
+
+<!-- COST ANALYSIS -->
+<div class="page" id="page-cost">
+  <div class="pt">Cost Analysis</div>
+  <div class="ps">True cost of power unreliability — what Ugandan manufacturers can never see without this tool</div>
+  <div class="s3" style="margin-bottom:18px">
+    <div class="sc"><div class="sc-bar" style="background:var(--red)"></div><div class="sc-lbl">Outage Revenue Loss</div><div class="sc-num n-r">UGX 28.4M</div><div class="sc-note">Production stopped · May 2025</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--amber)"></div><div class="sc-lbl">Generator Diesel Cost</div><div class="sc-num n-a">UGX 18.2M</div><div class="sc-note">840 litres · 14 outages</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--orange)"></div><div class="sc-lbl">TOTAL Power Failure Cost</div><div class="sc-num n-o">UGX 46.6M</div><div class="sc-note">This month alone</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div class="ch-t">Cost by Line — May 2025</div></div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Line 4 — Heavy Rolling</span><span class="mono n-r">UGX 9.8M</span></div><div class="prog"><div class="prog-fill" style="width:100%;background:var(--red)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Line 1 — Cold Rolling</span><span class="mono n-o">UGX 7.4M</span></div><div class="prog"><div class="prog-fill" style="width:76%;background:var(--orange)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Line 2 — Wire Drawing</span><span class="mono n-a">UGX 5.2M</span></div><div class="prog"><div class="prog-fill" style="width:53%;background:var(--amber)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Line 5 — Galvanising</span><span class="mono n-a">UGX 4.1M</span></div><div class="prog"><div class="prog-fill" style="width:42%;background:var(--amber)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Line 6 — Tube Forming</span><span class="mono">UGX 1.9M</span></div><div class="prog"><div class="prog-fill" style="width:19%;background:var(--lime)"></div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ch-t">Annualised Projection</div></div>
+      <div style="padding:16px 18px">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--bg3);border-radius:6px"><span>Monthly power failure cost</span><span class="mono n-o">UGX 46.6M</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--bg3);border-radius:6px"><span>Projected annual cost</span><span class="mono n-r">UGX 559M</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--re-bg);border-radius:6px;border:1px solid var(--re-bd)"><span style="font-weight:700">USD equivalent</span><span class="mono n-r" style="font-weight:700">~USD 152,000/year</span></div>
+        </div>
+        <div class="al-g" style="margin-bottom:0;font-size:12px">💡 A 500KVA solar backup system costs ~USD 80,000. <strong>Payback in 6 months.</strong> PowerCost data proves the investment case for your MD and board.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATOR TRACKER -->
+<div class="page" id="page-generator">
+  <div class="pt">Generator Tracker</div>
+  <div class="ps">Monitor fuel, runtime, maintenance schedule and cost per generator</div>
+  <div class="g3" style="margin-bottom:14px">
+    <div class="panel">
+      <div class="p-title">Generator 1 — 250KVA</div>
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">FUEL LEVEL</div>
+        <div style="font-size:36px;font-weight:700;font-family:var(--mono);color:var(--lime)">74%</div>
+        <div style="font-size:11px;color:var(--t2)">~148 litres remaining</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Status</span><span class="bdg bl">● Running</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Runtime today</span><span class="mono">2h 14min</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Fuel used today</span><span class="mono">67 litres</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Next service</span><span class="mono n-a">In 12 hrs</span></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:12px" onclick="showNotif('✓ Fuel refill request sent to stores')">Request Refill</button>
+    </div>
+    <div class="panel">
+      <div class="p-title">Generator 2 — 500KVA</div>
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">FUEL LEVEL</div>
+        <div style="font-size:36px;font-weight:700;font-family:var(--mono);color:var(--amber)">38%</div>
+        <div style="font-size:11px;color:var(--t2)">~190 litres remaining</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Status</span><span class="bdg ba">● Active (Line 4)</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Runtime today</span><span class="mono">0h 38min</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Fuel used today</span><span class="mono">22 litres</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Next service</span><span class="mono n-l">In 120 hrs</span></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:12px" onclick="showNotif('✓ Fuel refill request sent to stores')">Request Refill</button>
+    </div>
+    <div class="panel">
+      <div class="p-title">Generator 3 — 150KVA</div>
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">FUEL LEVEL</div>
+        <div style="font-size:36px;font-weight:700;font-family:var(--mono);color:var(--red)">12%</div>
+        <div style="font-size:11px;color:var(--red)">⚠ CRITICAL — refill now</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Status</span><span class="bdg bn">Standby</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Runtime today</span><span class="mono">0h</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Fuel remaining</span><span class="mono n-r">~18 litres</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Est. runtime left</span><span class="mono n-r">~36 min</span></div>
+      </div>
+      <button class="btn btn-red btn-sm" style="width:100%;justify-content:center;margin-top:12px" onclick="showNotif('🚨 URGENT refill request sent to Plant Manager')">🚨 Urgent Refill</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ch-t">Monthly Generator Cost Summary</div></div>
+    <table class="tbl">
+      <thead><tr><th>Generator</th><th>Total Runtime</th><th>Fuel Used</th><th>Diesel Cost</th><th>Maintenance</th><th>Total Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Generator 1 — 250KVA</td><td class="mono">42 hrs</td><td class="mono">840L</td><td class="mono">UGX 6.3M</td><td class="mono">UGX 800K</td><td class="mono n-o">UGX 7.1M</td></tr>
+        <tr><td>Generator 2 — 500KVA</td><td class="mono">28 hrs</td><td class="mono">1,120L</td><td class="mono">UGX 8.4M</td><td class="mono">UGX 600K</td><td class="mono n-o">UGX 9.0M</td></tr>
+        <tr><td>Generator 3 — 150KVA</td><td class="mono">14 hrs</td><td class="mono">280L</td><td class="mono">UGX 2.1M</td><td class="mono">UGX 200K</td><td class="mono n-a">UGX 2.3M</td></tr>
+        <tr style="font-weight:700"><td>Total</td><td class="mono">84 hrs</td><td class="mono">2,240L</td><td class="mono">UGX 16.8M</td><td class="mono">UGX 1.6M</td><td class="mono n-r">UGX 18.4M</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TRENDS -->
+<div class="page" id="page-trends">
+  <div class="pt">Outage Trends</div>
+  <div class="ps">When do outages happen? Which shifts lose most? UEDCL pattern analysis.</div>
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div class="ch-t">Outages by Hour of Day</div></div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">Most frequent outage times:</div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>06:00–09:00 (morning peak)</span><span class="mono n-r">6 outages</span></div><div class="prog"><div class="prog-fill" style="width:100%;background:var(--red)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>12:00–14:00 (midday)</span><span class="mono n-o">4 outages</span></div><div class="prog"><div class="prog-fill" style="width:67%;background:var(--orange)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>17:00–19:00 (evening peak)</span><span class="mono n-a">3 outages</span></div><div class="prog"><div class="prog-fill" style="width:50%;background:var(--amber)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Other times</span><span class="mono">1 outage</span></div><div class="prog"><div class="prog-fill" style="width:17%;background:var(--lime)"></div></div></div>
+        <div class="al-g" style="margin-top:8px;margin-bottom:0;font-size:12px">💡 Schedule maintenance-heavy work 09:00–12:00 and 14:00–17:00 — your most reliable power windows.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ch-t">Monthly Outage Cost Trend</div></div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>January 2025</span><span class="mono">UGX 18.4M</span></div><div class="prog"><div class="prog-fill" style="width:40%;background:var(--blue)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>February 2025</span><span class="mono">UGX 22.1M</span></div><div class="prog"><div class="prog-fill" style="width:48%;background:var(--amber)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>March 2025</span><span class="mono">UGX 31.8M</span></div><div class="prog"><div class="prog-fill" style="width:68%;background:var(--orange)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>April 2025</span><span class="mono">UGX 24.2M</span></div><div class="prog"><div class="prog-fill" style="width:52%;background:var(--amber)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>May 2025 (to date)</span><span class="mono n-r">UGX 46.6M</span></div><div class="prog"><div class="prog-fill" style="width:100%;background:var(--red)"></div></div></div>
+        <div class="al-r" style="margin-bottom:0;font-size:12px">⚠ May 2025 is already the worst month on record — and it's only the 19th.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MD REPORT -->
+<div class="page" id="page-reports">
+  <div class="pt">MD Report</div>
+  <div class="ps">Monthly power reliability report — ready for Board presentation</div>
+  <div class="al-b" style="margin-bottom:18px">ℹ This report is auto-generated every 1st of the month and emailed to the MD, Plant Manager, and CFO. It includes the UEDCL claim calculation.</div>
+  <div class="g2">
+    <div class="panel">
+      <div class="p-title">Executive Summary — May 2025</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--bg3);border-radius:6px"><span>Total outage events</span><span class="mono n-r">14</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--bg3);border-radius:6px"><span>Total downtime</span><span class="mono n-o">9 hours 14 minutes</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--bg3);border-radius:6px"><span>Revenue lost (production stopped)</span><span class="mono n-r">UGX 28.4M</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--bg3);border-radius:6px"><span>Generator cost (diesel + maintenance)</span><span class="mono n-a">UGX 18.2M</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;padding:9px 10px;background:var(--re-bg);border-radius:6px;border:1px solid var(--re-bd)"><span>TOTAL COST OF POWER UNRELIABILITY</span><span class="mono n-r">UGX 46.6M</span></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-lime btn-sm" onclick="showNotif('📧 Report emailed to MD, Plant Manager and CFO')">Email to MD</button>
+        <button class="btn btn-ghost btn-sm" onclick="showNotif('📥 PDF downloaded')">Download PDF</button>
+      </div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:14px">
+        <div class="p-title">UEDCL Compensation Claim</div>
+        <div style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:12px">PowerCost automatically compiles your outage log into a formal UEDCL compensation claim. Uganda's Electricity Regulatory Authority allows industrial customers to claim compensation for excessive outages.</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Outages exceeding SLA</span><span class="mono">9 of 14</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Claim-eligible downtime</span><span class="mono">6 hr 42 min</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--t2)">Estimated claim value</span><span class="mono n-l">UGX 8.4M</span></div>
+        </div>
+        <button class="btn btn-lime btn-sm" onclick="showNotif('✓ UEDCL claim package generated and ready to file')">Generate UEDCL Claim →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UEDCL -->
+<div class="page" id="page-uedcl">
+  <div class="pt">UEDCL Claims</div>
+  <div class="ps">File formal compensation claims against UEDCL for power interruptions exceeding service agreement</div>
+  <div class="al-g" style="margin-bottom:18px">💡 <strong>Most manufacturers never file UEDCL claims</strong> because they don't have documented proof of outages. PowerCost automatically builds this evidence — timestamps, duration, affected equipment, and revenue loss — making claims effortless.</div>
+  <div class="card">
+    <div class="ch"><div class="ch-t">Claim History</div><button class="btn btn-lime btn-sm" onclick="showNotif('✓ New UEDCL claim package generated')">New Claim</button></div>
+    <table class="tbl">
+      <thead><tr><th>Period</th><th>Outages</th><th>Total Downtime</th><th>Claim Value</th><th>Status</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td>April 2025</td><td>11</td><td class="mono">7h 22min</td><td class="mono n-l">UGX 6.8M</td><td><span class="bdg ba">Filed</span></td><td>Awaiting response</td></tr>
+        <tr><td>March 2025</td><td>14</td><td class="mono">9h 48min</td><td class="mono n-l">UGX 9.2M</td><td><span class="bdg bl">Settled</span></td><td>UGX 7.4M paid by UEDCL</td></tr>
+        <tr><td>February 2025</td><td>8</td><td class="mono">4h 12min</td><td class="mono n-l">UGX 4.1M</td><td><span class="bdg bl">Settled</span></td><td>UGX 3.8M paid by UEDCL</td></tr>
+        <tr><td>January 2025</td><td>6</td><td class="mono">3h 30min</td><td class="mono n-l">UGX 2.8M</td><td><span class="bdg bl">Settled</span></td><td>UGX 2.1M paid by UEDCL</td></tr>
+        <tr style="font-weight:700"><td>Total 2025</td><td>39</td><td class="mono">24h 52min</td><td class="mono n-l">UGX 22.9M</td><td></td><td class="n-l">UGX 13.3M recovered</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- main -->
+</div><!-- app -->
+
+<div class="notif" id="notif"></div>
+
+<script>
+const lines=[
+  {name:'Line 1 — Cold Rolling Mill',product:'Steel sheets',status:'running',rate:125000,downToday:22},
+  {name:'Line 2 — Wire Drawing',product:'Wire rods',status:'running',rate:80000,downToday:33},
+  {name:'Line 3 — Pipe Extrusion',product:'PVC/Steel pipe',status:'running',rate:60000,downToday:0},
+  {name:'Line 4 — Heavy Rolling Mill',product:'Steel bars / rods',status:'stopped',rate:125000,downToday:38},
+  {name:'Line 5 — Galvanising',product:'GI sheets',status:'generator',rate:90000,downToday:15},
+  {name:'Line 6 — Tube Forming',product:'Steel tubes',status:'running',rate:70000,downToday:22},
+  {name:'Line 7 — Cutting & Bending',product:'Custom steel',status:'running',rate:55000,downToday:0},
+  {name:'Line 8 — Quality/Inspection',product:'Finished product',status:'running',rate:30000,downToday:0},
+];
+
+function renderLinesMini(){
+  const el=document.getElementById('line-status-mini');
+  if(!el) return;
+  el.innerHTML=lines.map(l=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px">
+      <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${l.status==='running'?'var(--lime)':l.status==='generator'?'var(--amber)':'var(--red)'}"></div>
+      <span style="flex:1;font-weight:600">${l.name.split('—')[0]}</span>
+      <span style="color:var(--t2);font-size:11px">${l.name.split('—')[1]?.trim()}</span>
+      <span class="bdg ${l.status==='running'?'bl':l.status==='generator'?'ba':'br'}">${l.status==='running'?'Running':l.status==='generator'?'Gen':'STOPPED'}</span>
+    </div>`).join('');
+}
+
+function renderLines(){
+  const el=document.getElementById('line-cards');
+  if(!el) return;
+  el.innerHTML=lines.map(l=>`
+    <div class="line-card ${l.status}">
+      <div class="line-dot" style="background:${l.status==='running'?'var(--lime)':l.status==='generator'?'var(--amber)':'var(--red)'}"></div>
+      <div style="flex:1">
+        <div class="line-name">${l.name}</div>
+        <div class="line-meta">${l.product} · UGX ${(l.rate/1000).toFixed(0)}K/min loss when stopped</div>
+      </div>
+      <div class="line-stats">
+        <div><div class="ls-val" style="color:${l.downToday>0?'var(--red)':'var(--lime)'}">${l.downToday}min</div><div class="ls-lbl">Down today</div></div>
+        <div><div class="ls-val" style="color:${l.downToday>0?'var(--orange)':'var(--lime)'}">UGX ${((l.downToday*l.rate)/1000000).toFixed(1)}M</div><div class="ls-lbl">Lost today</div></div>
+      </div>
+      <span class="bdg ${l.status==='running'?'bl':l.status==='generator'?'ba':'br'}" style="margin-left:10px">${l.status==='running'?'✓ Running':l.status==='generator'?'⚡ Generator':'🔴 STOPPED'}</span>
+    </div>`).join('');
+}
+
+// Live cost counter
+let minutes=38;
+let liveCost=minutes*125000;
+function tickCounter(){
+  minutes++;
+  liveCost=minutes*125000;
+  const el=document.getElementById('cost-counter');
+  const te=document.getElementById('counter-time');
+  const lc=document.getElementById('live-cost');
+  if(el) el.textContent='UGX '+liveCost.toLocaleString();
+  if(te) te.textContent=`${minutes} min · Started 14:22`;
+  if(lc) lc.textContent='UGX '+(liveCost/1000000).toFixed(2)+'M';
+}
+setInterval(tickCounter,15000);
+
+function calcOutageCost(){
+  const rate=parseInt(document.getElementById('log-line')?.value)||125000;
+  const start=document.getElementById('log-start')?.value;
+  const end=document.getElementById('log-end')?.value;
+  if(!start) return;
+  const now=new Date();
+  const s=start.split(':');
+  const startMin=parseInt(s[0])*60+parseInt(s[1]);
+  let endMin;
+  if(end){const e=end.split(':');endMin=parseInt(e[0])*60+parseInt(e[1]);}
+  else{endMin=now.getHours()*60+now.getMinutes();}
+  const dur=Math.max(0,endMin-startMin);
+  const cost=dur*rate;
+  const el=document.getElementById('calc-cost');
+  const dl=document.getElementById('calc-detail');
+  if(el) el.textContent='UGX '+cost.toLocaleString();
+  if(dl) dl.textContent=`${dur} minutes × UGX ${(rate/1000).toFixed(0)}K/min`;
+}
+
+function logOutage(){showNotif('✓ Outage logged. Plant Manager and MD alerted by SMS. Cost recorded.');}
+function logRestore(){showNotif('✓ Power restored recorded. Final cost: UGX '+liveCost.toLocaleString()+'. UEDCL claim updated.');}
+
+function nav(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  const pages=['dash','lines','log','cost','trends','generator','reports','uedcl'];
+  document.querySelectorAll('.ni')[pages.indexOf(p)]?.classList.add('active');
+  if(p==='lines') renderLines();
+}
+function showNotif(msg){const n=document.getElementById('notif');n.textContent=msg;n.style.display='block';clearTimeout(window._nt);window._nt=setTimeout(()=>n.style.display='none',3500);}
+renderLinesMini();
+</script>
+<script>window.UFP={product:"powercost",api:"https://uganda-fiscal-platform-api.onrender.com"};</script>
+<script src="assets/platform.js"></script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EFRIS Intelligence — URA Compliance Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060810;--bg2:#0c0f1e;--bg3:#121628;--bg4:#181d34;
+  --bd:#1c2240;--bd2:#242c54;
+  --t1:#e8ecff;--t2:#6878c0;--t3:#2e3870;
+  --gold:#f0c040;--gold-bg:#181200;--gold-bd:#404000;
+  --teal:#20d0c0;--teal-bg:#001a18;--teal-bd:#006058;
+  --red:#ff4848;--red-bg:#180000;--red-bd:#500000;
+  --green:#40e080;--green-bg:#001808;--green-bd:#005028;
+  --blue:#4090ff;--blue-bg:#000c28;--blue-bd:#001060;
+  --orange:#ff8830;--orange-bg:#180800;--orange-bd:#502000;
+  --purple:#a060ff;--purple-bg:#100018;--purple-bd:#380050;
+  --sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--t1);min-height:100vh;}
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sb{width:238px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;}
+.brand{padding:20px 18px 14px;border-bottom:1px solid var(--bd);}
+.b-badge{font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.14em;font-family:var(--mono);margin-bottom:3px;}
+.b-name{font-size:17px;font-weight:700;color:var(--t1);letter-spacing:-.03em;}
+.b-sub{font-size:10px;color:var(--t3);margin-top:2px;}
+.ura-pill{margin:10px 12px 4px;background:linear-gradient(135deg,#001428,#001a10);border:1px solid var(--teal-bd);border-radius:8px;padding:9px 11px;}
+.up-n{font-size:12px;font-weight:600;color:var(--teal);}
+.up-s{font-size:10px;color:var(--t3);margin-top:1px;}
+.nav{padding:8px 10px;flex:1;overflow-y:auto;}
+.ns{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);padding:10px 10px 4px;}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:12.5px;color:var(--t2);margin-bottom:1px;transition:all .15s;}
+.ni:hover{background:var(--bg3);color:var(--t1);}
+.ni.active{background:var(--teal-bg);color:var(--teal);}
+.nb{margin-left:auto;font-size:9.5px;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.sb-kpi{margin:8px 12px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;}
+.kpi-r{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px;}
+.kpi-r:last-child{margin-bottom:0;}
+.kpi-v{color:var(--teal);font-weight:700;font-family:var(--mono);}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;}
+.page{display:none;padding:26px 30px;}
+.page.active{display:block;}
+.pt{font-size:22px;font-weight:700;letter-spacing:-.04em;margin-bottom:3px;}
+.ps{font-size:12.5px;color:var(--t2);margin-bottom:22px;}
+
+/* STATS */
+.s4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.s3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.sc{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.sc-bar{position:absolute;top:0;left:0;right:0;height:2px;}
+.sc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:7px;font-family:var(--mono);}
+.sc-num{font-size:26px;font-weight:700;line-height:1;margin-bottom:3px;font-family:var(--mono);}
+.sc-note{font-size:11px;color:var(--t3);}
+.n-t{color:var(--teal);}
+.n-g{color:var(--gold);}
+.n-r{color:var(--red);}
+.n-b{color:var(--blue);}
+.n-gr{color:var(--green);}
+.n-o{color:var(--orange);}
+.n-p{color:var(--purple);}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;}
+.ch{padding:12px 17px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px 10px 0 0;}
+.ch-t{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t2);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);font-weight:400;padding:9px 14px;text-align:left;border-bottom:1px solid var(--bd);background:var(--bg3);font-family:var(--mono);}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--bd);vertical-align:middle;font-size:12.5px;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--bg3);}
+.mono{font-family:var(--mono);font-size:11.5px;}
+
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;font-family:var(--mono);}
+.bt{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bd);}
+.bg-b{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bd);}
+.br{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);}
+.bb{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd);}
+.bgr{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd);}
+.bo{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-bd);}
+.bp{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd);}
+.bn{background:var(--bg3);color:var(--t2);border:1px solid var(--bd);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .15s;}
+.btn-teal{background:var(--teal);color:#000;}
+.btn-teal:hover{background:#18b0a0;}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-gold:hover{background:#d0a030;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-ghost{background:transparent;border:1px solid var(--bd);color:var(--t2);}
+.btn-ghost:hover{background:var(--bg3);color:var(--t1);}
+.btn-sm{padding:5px 10px;font-size:10.5px;}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+
+/* ALERTS */
+.al{border-radius:8px;padding:11px 14px;font-size:12.5px;line-height:1.5;margin-bottom:12px;}
+.al-t{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bd);}
+.al-g{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bd);}
+.al-r{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);}
+.al-b{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd);}
+.al-gr{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd);}
+
+/* PANEL */
+.panel{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:20px 22px;}
+.p-title{font-size:15px;font-weight:700;margin-bottom:14px;letter-spacing:-.02em;}
+
+/* PROGRESS */
+.prog{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.prog-f{height:100%;border-radius:3px;}
+
+/* RISK SCORE */
+.risk-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:var(--mono);}
+.risk-high{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);}
+.risk-med{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bd);}
+.risk-low{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd);}
+
+/* ANOMALY CARD */
+.anom-card{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:8px;}
+.anom-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.anom-title{font-size:13.5px;font-weight:600;margin-bottom:2px;}
+.anom-id{font-size:11px;color:var(--t3);font-family:var(--mono);}
+.anom-body{font-size:12.5px;color:var(--t2);line-height:1.55;}
+
+/* MAP */
+.map-area{background:var(--bg3);border-radius:10px;height:280px;position:relative;overflow:hidden;border:1px solid var(--bd);}
+
+/* AUDIT QUEUE */
+.aq-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--bd);}
+.aq-row:last-child{border-bottom:none;}
+.aq-num{font-size:18px;font-weight:700;color:var(--t3);width:28px;flex-shrink:0;font-family:var(--mono);}
+.aq-name{font-size:13px;font-weight:600;margin-bottom:2px;}
+.aq-meta{font-size:11.5px;color:var(--t2);}
+.aq-score{text-align:right;flex-shrink:0;}
+.aq-score-n{font-size:20px;font-weight:700;font-family:var(--mono);}
+.aq-score-l{font-size:9.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;}
+
+/* NOTIF */
+.notif{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--teal-bd);color:var(--teal);padding:12px 18px;border-radius:8px;font-size:13px;z-index:1000;display:none;box-shadow:0 8px 32px #000a;}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:#000c;z-index:500;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px #000a;}
+.mh{padding:18px 22px 14px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;}
+.mh h3{font-size:16px;font-weight:700;}
+.mclose{background:none;border:none;color:var(--t2);cursor:pointer;font-size:20px;}
+.mb{padding:20px 22px;}
+.mf{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="sb">
+  <div class="brand">
+    <div class="b-badge">Uganda Revenue Authority</div>
+    <div class="b-name">EFRIS Intelligence</div>
+    <div class="b-sub">Compliance Analytics Platform</div>
+  </div>
+  <div class="ura-pill">
+    <div class="up-n">🇺🇬 URA Domestic Taxes</div>
+    <div class="up-s">Commissioner access · Live data</div>
+  </div>
+  <nav class="nav">
+    <div class="ns">National View</div>
+    <div class="ni active" onclick="nav('dash')">📊 National Dashboard</div>
+    <div class="ni" onclick="nav('heatmap')">🗺 Compliance Heatmap</div>
+    <div class="ni" onclick="nav('sectors')">🏭 Sector Analysis</div>
+    <div class="ns">Fraud Detection</div>
+    <div class="ni" onclick="nav('dormant')">💤 Dormant Taxpayers <span class="nb">4,821</span></div>
+    <div class="ni" onclick="nav('anomalies')">🚨 Anomalies <span class="nb">127</span></div>
+    <div class="ni" onclick="nav('audit')">🎯 Audit Queue</div>
+    <div class="ns">Revenue</div>
+    <div class="ni" onclick="nav('revenue')">💰 Revenue Intelligence</div>
+    <div class="ni" onclick="nav('forecast')">📈 Tax Gap Forecast</div>
+  </nav>
+  <div class="sb-kpi">
+    <div class="kpi-r"><span>Registered EFRIS</span><span class="kpi-v">184,240</span></div>
+    <div class="kpi-r"><span>Actively compliant</span><span class="kpi-v">89,420</span></div>
+    <div class="kpi-r"><span>Dormant (>90 days)</span><span class="kpi-v" style="color:var(--red)">4,821</span></div>
+    <div class="kpi-r"><span>Tax gap est.</span><span class="kpi-v" style="color:var(--gold)">UGX 1.7T</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- NATIONAL DASHBOARD -->
+<div class="page active" id="page-dash">
+  <div class="pt">National Compliance Dashboard</div>
+  <div class="ps">EFRIS Intelligence · Uganda Revenue Authority · Commissioner View · Live data</div>
+
+  <div class="al-g" style="margin-bottom:18px">
+    ⚡ <strong>127 anomalies detected</strong> this week — businesses whose invoice volumes are significantly below what their sector and size would predict. Estimated tax at risk: <strong>UGX 84 billion.</strong>
+    <span style="cursor:pointer;text-decoration:underline;margin-left:8px" onclick="nav('anomalies')">Review anomalies →</span>
+  </div>
+
+  <div class="s4">
+    <div class="sc"><div class="sc-bar" style="background:var(--teal)"></div>
+      <div class="sc-lbl">EFRIS Registered</div><div class="sc-num n-t">184,240</div><div class="sc-note">Total businesses on EFRIS</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--green)"></div>
+      <div class="sc-lbl">Genuinely Active</div><div class="sc-num n-gr">89,420</div><div class="sc-note">48.5% — issued invoice <30 days</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--red)"></div>
+      <div class="sc-lbl">Dormant (0 invoices 90d)</div><div class="sc-num n-r">4,821</div><div class="sc-note">Registered but not compliant</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--gold)"></div>
+      <div class="sc-lbl">Anomaly Risk Score</div><div class="sc-num n-g">127</div><div class="sc-note">High-risk — audit priority</div></div>
+  </div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ch-t">Compliance Rate by Sector</div><button class="btn btn-ghost btn-sm" onclick="nav('sectors')">Full Breakdown →</button></div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Manufacturing</span><span class="mono n-gr">72.4%</span></div><div class="prog"><div class="prog-f" style="width:72.4%;background:var(--green)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Wholesale & Retail</span><span class="mono n-g">58.1%</span></div><div class="prog"><div class="prog-f" style="width:58.1%;background:var(--gold)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Services (ICT, professional)</span><span class="mono n-g">54.2%</span></div><div class="prog"><div class="prog-f" style="width:54.2%;background:var(--gold)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Construction</span><span class="mono n-o">38.7%</span></div><div class="prog"><div class="prog-f" style="width:38.7%;background:var(--orange)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Mining & Quarrying</span><span class="mono n-r">12.3%</span></div><div class="prog"><div class="prog-f" style="width:12.3%;background:var(--red)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Accommodation & Food</span><span class="mono n-r">21.8%</span></div><div class="prog"><div class="prog-f" style="width:21.8%;background:var(--red)"></div></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><div class="ch-t">Top Audit Targets This Week</div><button class="btn btn-ghost btn-sm" onclick="nav('audit')">Full Queue →</button></div>
+      <div id="top-audit-list" style="padding:0"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ch-t">Monthly EFRIS Compliance vs Revenue Gap</div></div>
+    <div style="padding:16px 20px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+      <div><div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">Jan 2025</div><div style="font-size:14px;font-weight:700;color:var(--blue)">47.2%</div><div style="font-size:11px;color:var(--t3)">compliance</div></div>
+      <div><div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">Feb 2025</div><div style="font-size:14px;font-weight:700;color:var(--blue)">48.8%</div><div style="font-size:11px;color:var(--t3)">compliance</div></div>
+      <div><div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">Mar 2025</div><div style="font-size:14px;font-weight:700;color:var(--gold)">46.1%</div><div style="font-size:11px;color:var(--t3)">compliance</div></div>
+      <div><div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">Apr 2025</div><div style="font-size:14px;font-weight:700;color:var(--gold)">47.9%</div><div style="font-size:11px;color:var(--t3)">compliance</div></div>
+      <div><div style="font-size:11px;color:var(--t3);font-family:var(--mono);margin-bottom:4px">May 2025</div><div style="font-size:14px;font-weight:700;color:var(--teal)">48.5%</div><div style="font-size:11px;color:var(--t3)">compliance</div></div>
+    </div>
+    <div style="padding:0 20px 14px">
+      <div class="al-g" style="margin-bottom:0">📊 Despite growing registrations, the <strong>compliance rate has barely moved in 5 months</strong> — hovering around 48%. This is the core problem: more businesses registered but not more businesses genuinely compliant. EFRIS Intelligence identifies exactly which ones are not compliant and why.</div>
+    </div>
+  </div>
+</div>
+
+<!-- HEATMAP -->
+<div class="page" id="page-heatmap">
+  <div class="pt">National Compliance Heatmap</div>
+  <div class="ps">Districts ranked by EFRIS compliance rate — red = enforcement priority</div>
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div class="ch-t">Uganda — Compliance Rate by District</div></div>
+      <div style="padding:14px">
+        <div class="map-area">
+          <svg viewBox="0 0 380 280" style="position:absolute;inset:0;width:100%;height:100%" xmlns="http://www.w3.org/2000/svg">
+            <rect width="380" height="280" fill="#131628"/>
+            <path d="M90 28 L290 28 L320 78 L308 198 L255 255 L190 270 L125 255 L70 198 L60 108 Z" fill="none" stroke="#1c2240" stroke-width="1.5"/>
+          </svg>
+          <div id="compliance-dots" style="position:absolute;inset:0"></div>
+          <div style="position:absolute;bottom:8px;right:8px;background:#0c0f1eee;border-radius:6px;padding:8px 10px;font-size:9.5px;font-family:var(--mono)">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>&gt;60% compliant</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><div style="width:7px;height:7px;border-radius:50%;background:var(--gold)"></div>40–60%</div>
+            <div style="display:flex;align-items:center;gap:5px"><div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div>&lt;40% — priority</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ch-t">District Compliance Rankings</div></div>
+      <table class="tbl">
+        <thead><tr><th>District</th><th>Registered</th><th>Active</th><th>Rate</th><th>Priority</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600">Kampala</td><td class="mono">48,420</td><td class="mono">34,120</td><td class="mono n-gr">70.5%</td><td><span class="bdg bgr">Good</span></td></tr>
+          <tr><td style="font-weight:600">Wakiso</td><td class="mono">18,240</td><td class="mono">11,040</td><td class="mono n-gr">60.5%</td><td><span class="bdg bgr">Good</span></td></tr>
+          <tr><td style="font-weight:600">Jinja</td><td class="mono">6,420</td><td class="mono">3,520</td><td class="mono n-g">54.8%</td><td><span class="bdg bg-b">Monitor</span></td></tr>
+          <tr><td style="font-weight:600">Mbarara</td><td class="mono">5,840</td><td class="mono">2,980</td><td class="mono n-g">51.0%</td><td><span class="bdg bg-b">Monitor</span></td></tr>
+          <tr><td style="font-weight:600">Gulu</td><td class="mono">4,120</td><td class="mono">1,640</td><td class="mono n-o">39.8%</td><td><span class="bdg bo">Enforce</span></td></tr>
+          <tr><td style="font-weight:600">Arua</td><td class="mono">3,480</td><td class="mono">1,180</td><td class="mono n-r">33.9%</td><td><span class="bdg br">Priority</span></td></tr>
+          <tr><td style="font-weight:600">Mbale</td><td class="mono">3,120</td><td class="mono">980</td><td class="mono n-r">31.4%</td><td><span class="bdg br">Priority</span></td></tr>
+          <tr><td style="font-weight:600">Lira</td><td class="mono">2,840</td><td class="mono">780</td><td class="mono n-r">27.5%</td><td><span class="bdg br">Priority</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- DORMANT TAXPAYERS -->
+<div class="page" id="page-dormant">
+  <div class="pt">Dormant Taxpayer Detection</div>
+  <div class="ps">4,821 businesses registered on EFRIS but have not issued a single invoice in over 90 days — representing estimated uncollected tax of UGX 48 billion</div>
+
+  <div class="al-r" style="margin-bottom:18px">
+    🚨 <strong>4,821 dormant accounts detected.</strong> These businesses registered under pressure but never used EFRIS. They are in the tax net on paper — but completely outside it in practice. Targeting these with a re-engagement campaign could recover UGX 48+ billion in annual tax.
+  </div>
+
+  <div class="s3">
+    <div class="sc"><div class="sc-bar" style="background:var(--red)"></div>
+      <div class="sc-lbl">Dormant >90 days</div><div class="sc-num n-r">4,821</div><div class="sc-note">Zero invoices issued</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--gold)"></div>
+      <div class="sc-lbl">Estimated Tax at Risk</div><div class="sc-num n-g">UGX 48B</div><div class="sc-note">Annual if brought to compliance</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--teal)"></div>
+      <div class="sc-lbl">Re-engagement SMS Sent</div><div class="sc-num n-t">1,240</div><div class="sc-note">This week — 18% response rate</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ch">
+      <div class="ch-t">Dormant Taxpayer Registry</div>
+      <div style="display:flex;gap:8px">
+        <select style="padding:5px 10px;font-size:11px;background:var(--bg3);border:1px solid var(--bd);border-radius:6px;color:var(--t1)" onchange="filterDormant(this.value)">
+          <option value="all">All sectors</option>
+          <option value="construction">Construction</option>
+          <option value="mining">Mining</option>
+          <option value="food">Food & Accommodation</option>
+        </select>
+        <button class="btn btn-gold btn-sm" onclick="sendBulkSMS()">📱 Send Reminder SMS</button>
+      </div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Business</th><th>TIN</th><th>Sector</th><th>District</th><th>Registered</th><th>Last Invoice</th><th>Days Dormant</th><th>Est. Annual Tax</th><th>Action</th></tr></thead>
+      <tbody id="dormant-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ANOMALIES -->
+<div class="page" id="page-anomalies">
+  <div class="pt">Anomaly Detection</div>
+  <div class="ps">Businesses whose EFRIS invoice patterns don't match what their sector, size, or history would predict — a strong signal of underreporting</div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ch-t">Anomaly Types Detected</div></div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:9px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--red-bg);border-radius:7px"><div><div style="font-size:13px;font-weight:600;color:var(--red)">Invoice suppression</div><div style="font-size:11.5px;color:var(--t2)">Turnover reported far below sector median for business size</div></div><span class="bdg br" style="margin-left:10px">48 cases</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--gold-bg);border-radius:7px"><div><div style="font-size:13px;font-weight:600;color:var(--gold)">Sudden volume drop</div><div style="font-size:11.5px;color:var(--t2)">Invoice volume dropped &gt;60% from prior 3-month average</div></div><span class="bdg bg-b" style="margin-left:10px">31 cases</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--orange-bg);border-radius:7px"><div><div style="font-size:13px;font-weight:600;color:var(--orange)">Round-number clustering</div><div style="font-size:11.5px;color:var(--t2)">90%+ of invoices are round numbers — manual entry manipulation</div></div><span class="bdg bo" style="margin-left:10px">24 cases</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--purple-bg);border-radius:7px"><div><div style="font-size:13px;font-weight:600;color:var(--purple)">Refund claim anomaly</div><div style="font-size:11.5px;color:var(--t2)">VAT refund claims exceed output VAT issued — impossible math</div></div><span class="bdg bp" style="margin-left:10px">24 cases</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><div class="ch-t">Risk Score Distribution</div></div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Critical Risk (90–100)</span><span class="mono n-r">24 businesses</span></div><div class="prog"><div class="prog-f" style="width:19%;background:var(--red)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>High Risk (70–89)</span><span class="mono n-o">38 businesses</span></div><div class="prog"><div class="prog-f" style="width:30%;background:var(--orange)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Medium Risk (50–69)</span><span class="mono n-g">65 businesses</span></div><div class="prog"><div class="prog-f" style="width:51%;background:var(--gold)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Low Risk (below 50)</span><span class="mono n-t">89,000+ businesses</span></div><div class="prog"><div class="prog-f" style="width:100%;background:var(--teal)"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANOMALY CASES -->
+  <div class="anom-card" style="border-color:var(--red-bd)">
+    <div class="anom-head">
+      <div><div class="anom-id">ANOMALY-2025-0127 · Critical Risk Score: 96/100</div><div class="anom-title" style="color:var(--red)">🚨 Kampala Steel Fabricators Ltd — Invoice Suppression</div></div>
+      <span class="risk-pill risk-high">96 / 100</span>
+    </div>
+    <div class="anom-body">TIN 1002341876 · Manufacturing sector · Namanve. Declared UGX 8.4M monthly turnover via EFRIS. Sector median for a factory with 42 employees is UGX 184M/month. Business has 3 lorries registered at UNRA, leases 2 warehouse bays, and imports raw steel quarterly from Kenya. EFRIS invoices suggest a business 22x smaller than all external indicators. Estimated underreported tax: UGX 3.2B annually.</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-red btn-sm" onclick="showNotif('🎯 Kampala Steel Fabricators added to audit queue — Namanve field team notified')">Add to Audit Queue</button>
+      <button class="btn btn-ghost btn-sm" onclick="showNotif('📋 Full case file generated for tax investigator')">Generate Case File</button>
+    </div>
+  </div>
+
+  <div class="anom-card" style="border-color:var(--gold-bd)">
+    <div class="anom-head">
+      <div><div class="anom-id">ANOMALY-2025-0126 · High Risk Score: 84/100</div><div class="anom-title" style="color:var(--gold)">⚠ Arua Border Traders Co-op — Sudden Volume Drop</div></div>
+      <span class="risk-pill risk-high">84 / 100</span>
+    </div>
+    <div class="anom-body">TIN 1008742341 · Wholesale trade · Arua. EFRIS invoices averaged UGX 84M/month for Jan–Mar 2025. April 2025 dropped to UGX 4.2M — a 95% decline. No business closure notice filed. Directors still active at URSB. Customs records show continued cross-border imports from DRC in April–May. Likely switched to unrecorded cash transactions after an enforcement visit.</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-gold btn-sm" onclick="showNotif('🎯 Arua Border Traders added to audit queue — Arua field team assigned')">Flag for Audit</button>
+      <button class="btn btn-ghost btn-sm" onclick="showNotif('📊 Cross-referencing with Customs import data...')">Cross-ref Customs Data</button>
+    </div>
+  </div>
+
+  <div class="anom-card" style="border-color:var(--purple-bd)">
+    <div class="anom-head">
+      <div><div class="anom-id">ANOMALY-2025-0125 · High Risk Score: 78/100</div><div class="anom-title" style="color:var(--purple)">⚠ Kampala ICT Services Ltd — VAT Refund Anomaly</div></div>
+      <span class="risk-pill risk-high">78 / 100</span>
+    </div>
+    <div class="anom-body">TIN 1004821034 · ICT services · Kampala. Filed VAT refund claim of UGX 184M for April 2025. Total output VAT issued via EFRIS in April: UGX 42M. Claiming UGX 142M more in input VAT than output VAT issued — arithmetically impossible for a service business with minimal capital expenditure. Supplier invoices supporting the input claim include 3 vendors not found in EFRIS registry.</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-red btn-sm" onclick="showNotif('🚫 VAT refund claim UGX 184M BLOCKED pending investigation')">Block Refund Claim</button>
+      <button class="btn btn-ghost btn-sm" onclick="showNotif('📋 Case escalated to Anti-Fraud Unit')">Escalate to Anti-Fraud</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIT QUEUE -->
+<div class="page" id="page-audit">
+  <div class="pt">AI-Prioritised Audit Queue</div>
+  <div class="ps">Businesses ranked by compliance risk score — highest ROI targets for URA field investigators</div>
+
+  <div class="al-t" style="margin-bottom:18px">
+    ℹ <strong>Data-driven enforcement:</strong> Instead of blanket inspections costing URA field teams weeks of wasted effort, EFRIS Intelligence ranks every business by risk score. A field investigator visits the top 10 on this list — they are statistically the highest-yield targets. Last quarter's AI-prioritised audits recovered an average of <strong>UGX 840M per audit</strong> vs UGX 82M from random audits.
+  </div>
+
+  <div class="card">
+    <div class="ch">
+      <div class="ch-t">Priority Audit Queue — Top 20</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-teal btn-sm" onclick="showNotif('📋 Audit assignments sent to all regional field teams')">Assign All to Field Teams</button>
+        <button class="btn btn-ghost btn-sm" onclick="showNotif('📥 Audit list exported to investigation system')">Export</button>
+      </div>
+    </div>
+    <div id="audit-queue-list" style="padding:0"></div>
+  </div>
+</div>
+
+<!-- REVENUE INTELLIGENCE -->
+<div class="page" id="page-revenue">
+  <div class="pt">Revenue Intelligence</div>
+  <div class="ps">Where Uganda's tax gap is, why it exists, and how much is recoverable</div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="panel">
+      <div class="p-title">Tax Gap Anatomy — May 2025</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--bg3);border-radius:6px"><span>URA revenue target</span><span class="mono">UGX 29.0T</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--bg3);border-radius:6px"><span>Actual collection</span><span class="mono">UGX 27.3T</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:9px 10px;background:var(--red-bg);border-radius:6px;border:1px solid var(--red-bd)"><span style="font-weight:600">Revenue gap</span><span class="mono n-r" style="font-weight:700">UGX 1.7T</span></div>
+        <div style="border-top:1px solid var(--bd);padding-top:10px;margin-top:2px">
+          <div style="font-size:11px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Gap attributed to:</div>
+          <div style="display:flex;flex-direction:column;gap:7px;font-size:12.5px">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--red)">Dormant EFRIS (not filing)</span><span class="mono n-r">UGX 480B</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--orange)">Invoice suppression (anomalies)</span><span class="mono n-o">UGX 840B</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--gold)">Informal sector (no EFRIS)</span><span class="mono n-g">UGX 380B</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="p-title">Recoverable Revenue — If Gaps Closed</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+        <div style="padding:10px 12px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:7px"><div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:3px">Activate dormant EFRIS accounts</div><div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t2)">4,821 businesses · Avg UGX 10M/year each</span><span class="mono n-r" style="font-weight:700">UGX 48B/year</span></div></div>
+        <div style="padding:10px 12px;background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:7px"><div style="font-size:12px;font-weight:600;color:var(--gold);margin-bottom:3px">Audit top 127 anomaly cases</div><div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t2)">Avg UGX 840M recovery per audit</span><span class="mono n-g" style="font-weight:700">UGX 107B potential</span></div></div>
+        <div style="padding:10px 12px;background:var(--teal-bg);border:1px solid var(--teal-bd);border-radius:7px"><div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:3px">EFRIS Bridge — informal sector</div><div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t2)">14,820 informal biz · Growing 30%/month</span><span class="mono n-t" style="font-weight:700">UGX 55B/year</span></div></div>
+        <div style="padding:10px 12px;background:var(--green-bg);border:1px solid var(--green-bd);border-radius:7px;border-top:2px solid var(--green)"><div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700"><span style="color:var(--green)">Total recoverable (Year 1)</span><span class="mono n-gr">UGX 210B</span></div></div>
+      </div>
+      <button class="btn btn-teal" style="width:100%;justify-content:center" onclick="showNotif('✓ Revenue recovery report sent to Commissioner and Ministry of Finance')">Submit to Commissioner & MoF</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORECAST -->
+<div class="page" id="page-forecast">
+  <div class="pt">Tax Gap Forecast</div>
+  <div class="ps">Projected EFRIS compliance trajectory and revenue impact — 12-month outlook</div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch"><div class="ch-t">Compliance Rate Forecast — With vs Without Intelligence-Led Enforcement</div></div>
+    <div style="padding:18px 20px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Current trajectory (no intervention)</span><span class="mono n-g">52% by Dec 2025</span></div>
+          <div class="prog"><div class="prog-f" style="width:52%;background:var(--gold)"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>With EFRIS Intelligence enforcement</span><span class="mono n-t">71% by Dec 2025</span></div>
+          <div class="prog"><div class="prog-f" style="width:71%;background:var(--teal)"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>With Intelligence + Bridge (informal)</span><span class="mono n-gr">84% by Dec 2025</span></div>
+          <div class="prog"><div class="prog-f" style="width:84%;background:var(--green)"></div></div>
+        </div>
+      </div>
+      <div class="al-t" style="margin-top:14px;margin-bottom:0">⚡ Moving from 48.5% to 84% compliance would generate an additional <strong>UGX 4.2 trillion in annual tax revenue</strong> — closing the entire 2025 revenue gap and setting URA on a path to the 20% tax-to-GDP target.</div>
+    </div>
+  </div>
+  <div class="s3">
+    <div class="sc"><div class="sc-bar" style="background:var(--gold)"></div><div class="sc-lbl">No intervention (Dec 2025)</div><div class="sc-num n-g">UGX 27.8T</div><div class="sc-note">Projected collections</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--teal)"></div><div class="sc-lbl">With Intelligence only</div><div class="sc-num n-t">UGX 29.6T</div><div class="sc-note">Exceeds target by UGX 600B</div></div>
+    <div class="sc"><div class="sc-bar" style="background:var(--green)"></div><div class="sc-lbl">Intelligence + Bridge</div><div class="sc-num n-gr">UGX 32.1T</div><div class="sc-note">+UGX 3.1T above target</div></div>
+  </div>
+</div>
+
+<!-- SECTORS -->
+<div class="page" id="page-sectors">
+  <div class="pt">Sector Analysis</div>
+  <div class="ps">EFRIS compliance broken down by sector — where the gaps are and why</div>
+  <div class="card">
+    <div class="ch"><div class="ch-t">All Sectors — Compliance Dashboard</div></div>
+    <table class="tbl">
+      <thead><tr><th>Sector</th><th>Registered</th><th>Active</th><th>Compliance %</th><th>Avg Invoice/mo</th><th>Est. Tax Gap/year</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Manufacturing</td><td class="mono">8,420</td><td class="mono">6,096</td><td class="mono n-gr">72.4%</td><td class="mono">UGX 4.2M</td><td class="mono">UGX 84B</td><td><span class="bdg bgr">Good</span></td></tr>
+        <tr><td style="font-weight:600">Wholesale & Retail</td><td class="mono">42,180</td><td class="mono">24,508</td><td class="mono n-g">58.1%</td><td class="mono">UGX 1.8M</td><td class="mono">UGX 340B</td><td><span class="bdg bg-b">Monitor</span></td></tr>
+        <tr><td style="font-weight:600">ICT & Professional Services</td><td class="mono">12,840</td><td class="mono">6,959</td><td class="mono n-g">54.2%</td><td class="mono">UGX 3.4M</td><td class="mono">UGX 184B</td><td><span class="bdg bg-b">Monitor</span></td></tr>
+        <tr><td style="font-weight:600">Transport & Storage</td><td class="mono">8,240</td><td class="mono">3,955</td><td class="mono n-o">48.0%</td><td class="mono">UGX 2.1M</td><td class="mono">UGX 120B</td><td><span class="bdg bo">Enforce</span></td></tr>
+        <tr><td style="font-weight:600">Construction</td><td class="mono">14,820</td><td class="mono">5,734</td><td class="mono n-r">38.7%</td><td class="mono">UGX 8.4M</td><td class="mono">UGX 480B</td><td><span class="bdg br">Priority</span></td></tr>
+        <tr><td style="font-weight:600">Accommodation & Food</td><td class="mono">18,240</td><td class="mono">3,977</td><td class="mono n-r">21.8%</td><td class="mono">UGX 840K</td><td class="mono">UGX 240B</td><td><span class="bdg br">Priority</span></td></tr>
+        <tr><td style="font-weight:600">Mining & Quarrying</td><td class="mono">2,840</td><td class="mono">349</td><td class="mono n-r">12.3%</td><td class="mono">UGX 12.4M</td><td class="mono">UGX 128B</td><td><span class="bdg br">Priority</span></td></tr>
+        <tr><td style="font-weight:600">Real Estate</td><td class="mono">6,420</td><td class="mono">1,605</td><td class="mono n-r">25.0%</td><td class="mono">UGX 6.8M</td><td class="mono">UGX 180B</td><td><span class="bdg br">Priority</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div></div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+const dormantData = [
+  { biz:'Gulu Construction Ltd', tin:'1006782341', sector:'Construction', dist:'Gulu', reg:'Jan 2025', last:'Never', days:140, tax:'UGX 42M' },
+  { biz:'Arua Border Exports', tin:'1008234521', sector:'Wholesale', dist:'Arua', reg:'Feb 2025', last:'Never', days:98, tax:'UGX 18M' },
+  { biz:'Mbale Hotel Services', tin:'1004512387', sector:'Accommodation', dist:'Mbale', reg:'Nov 2024', last:'Dec 2024', days:145, tax:'UGX 8.4M' },
+  { biz:'Nakasero Real Estate', tin:'1002345678', sector:'Real Estate', dist:'Kampala', reg:'Mar 2025', last:'Never', days:78, tax:'UGX 84M' },
+  { biz:'Jinja Mining Co', tin:'1007823456', sector:'Mining', dist:'Jinja', reg:'Jan 2025', last:'Never', days:138, tax:'UGX 124M' },
+  { biz:'Mbarara Transport Ltd', tin:'1003456789', sector:'Transport', dist:'Mbarara', reg:'Dec 2024', last:'Jan 2025', days:110, tax:'UGX 28M' },
+];
+
+const auditQueue = [
+  { rank:1, biz:'Kampala Steel Fabricators', tin:'1002341876', sector:'Manufacturing', dist:'Namanve', score:96, taxRisk:'UGX 3.2B', type:'Invoice suppression' },
+  { rank:2, biz:'Arua Border Traders Co-op', tin:'1008742341', sector:'Wholesale', dist:'Arua', score:84, taxRisk:'UGX 840M', type:'Volume drop' },
+  { rank:3, biz:'Kampala ICT Services Ltd', tin:'1004821034', sector:'ICT', dist:'Kampala', score:78, taxRisk:'UGX 184M', type:'VAT refund fraud' },
+  { rank:4, biz:'Gulu Construction Masters', tin:'1006234512', sector:'Construction', dist:'Gulu', score:74, taxRisk:'UGX 620M', type:'Invoice suppression' },
+  { rank:5, biz:'Nakasero Real Estate Co', tin:'1002345678', sector:'Real Estate', dist:'Kampala', score:71, taxRisk:'UGX 1.4B', type:'Dormant + assets' },
+  { rank:6, biz:'Mbarara Hotel Group', tin:'1003456712', sector:'Accommodation', dist:'Mbarara', score:68, taxRisk:'UGX 280M', type:'Sector underreport' },
+  { rank:7, biz:'Jinja Mining Exports', tin:'1007823411', sector:'Mining', dist:'Jinja', score:64, taxRisk:'UGX 840M', type:'Zero filing' },
+];
+
+const topAuditData = auditQueue.slice(0,5);
+
+function renderTopAuditList() {
+  const el = document.getElementById('top-audit-list');
+  if(!el) return;
+  el.innerHTML = topAuditData.map(a => `
+    <div class="aq-row">
+      <div class="aq-num">${a.rank}</div>
+      <div style="flex:1">
+        <div class="aq-name">${a.biz}</div>
+        <div class="aq-meta">${a.sector} · ${a.dist} · ${a.type}</div>
+      </div>
+      <div class="aq-score">
+        <div class="aq-score-n" style="color:${a.score>=90?'var(--red)':a.score>=70?'var(--orange)':'var(--gold)'}">${a.score}</div>
+        <div class="aq-score-l">Risk score</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderDormant(filter='all') {
+  const list = filter==='all' ? dormantData : dormantData.filter(d=>d.sector.toLowerCase().includes(filter));
+  document.getElementById('dormant-table').innerHTML = list.map(d => `
+    <tr>
+      <td style="font-weight:600">${d.biz}</td>
+      <td class="mono">${d.tin}</td>
+      <td>${d.sector}</td>
+      <td>${d.dist}</td>
+      <td class="mono">${d.reg}</td>
+      <td class="mono" style="color:${d.last==='Never'?'var(--red)':'var(--gold)'}">${d.last}</td>
+      <td class="mono" style="color:var(--red)">${d.days} days</td>
+      <td class="mono" style="color:var(--teal)">${d.tax}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="showNotif('📱 Reminder SMS sent to ${d.biz}')">Send SMS</button></td>
+    </tr>`).join('');
+}
+
+function renderAuditQueue() {
+  const el = document.getElementById('audit-queue-list');
+  if(!el) return;
+  el.innerHTML = auditQueue.map(a => `
+    <div class="aq-row">
+      <div class="aq-num">${a.rank}</div>
+      <div style="flex:1">
+        <div class="aq-name">${a.biz}</div>
+        <div class="aq-meta">TIN: ${a.tin} · ${a.sector} · ${a.dist} · Flag: ${a.type}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-right:14px">
+        <div class="mono" style="color:var(--red);font-size:13px;font-weight:700">${a.taxRisk}</div>
+        <div style="font-size:9.5px;color:var(--t3)">at risk</div>
+      </div>
+      <div class="aq-score" style="margin-right:14px">
+        <div class="aq-score-n" style="color:${a.score>=90?'var(--red)':a.score>=70?'var(--orange)':'var(--gold)'}">${a.score}</div>
+        <div class="aq-score-l">Risk</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="showNotif('🎯 ${a.biz} assigned to field investigator')">Assign →</button>
+    </div>`).join('');
+}
+
+function renderComplianceDots() {
+  const dots=[
+    {x:51,y:51,r:22,c:'var(--green)'},{x:54,y:47,r:16,c:'var(--green)'},
+    {x:50,y:34,r:13,c:'var(--gold)'},{x:64,y:48,r:11,c:'var(--gold)'},
+    {x:41,y:64,r:14,c:'var(--orange)'},{x:37,y:54,r:12,c:'var(--red)'},
+    {x:70,y:37,r:10,c:'var(--red)'},{x:44,y:39,r:9,c:'var(--red)'},
+  ];
+  const el=document.getElementById('compliance-dots');
+  if(!el) return;
+  el.innerHTML=dots.map(d=>`<div style="position:absolute;left:${d.x}%;top:${d.y}%;transform:translate(-50%,-50%)"><div style="width:${d.r}px;height:${d.r}px;border-radius:50%;background:${d.c};opacity:.7;border:1px solid #fff2"></div></div>`).join('');
+}
+
+function filterDormant(v) { renderDormant(v); }
+function sendBulkSMS() { showNotif('📱 Reminder SMS sent to all 4,821 dormant accounts via MTN/Airtel'); }
+
+function nav(p) {
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  const pages=['dash','heatmap','sectors','dormant','anomalies','audit','revenue','forecast'];
+  document.querySelectorAll('.ni')[pages.indexOf(p)]?.classList.add('active');
+  if(p==='heatmap') renderComplianceDots();
+  if(p==='dormant') renderDormant();
+  if(p==='audit') renderAuditQueue();
+}
+
+function showNotif(msg) { const n=document.getElementById('notif'); n.textContent=msg; n.style.display='block'; clearTimeout(window._nt); window._nt=setTimeout(()=>n.style.display='none',3500); }
+
+renderTopAuditList();
+</script>
+<script>window.UFP={product:"efrisdash",api:"https://uganda-fiscal-platform-api.onrender.com"};</script>
+<script src="assets/platform.js"></script>
+</body>
+</html>

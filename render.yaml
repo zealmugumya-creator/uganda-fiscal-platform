@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: uganda-fiscal-platform-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false        # set this in the Render dashboard (secret)
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-5
+      - key: ALLOWED_ORIGINS
+        value: "*"

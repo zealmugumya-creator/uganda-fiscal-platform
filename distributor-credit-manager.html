@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CreditTrack Uganda — Distributor Credit & Collections</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --bg2: #ffffff;
+  --bg3: #eeecea;
+  --border: #dddbd6;
+  --border2: #ccc9c3;
+  --text: #1a1814;
+  --text2: #5c5850;
+  --text3: #9c9890;
+  --green: #1a7a4a;
+  --green-bg: #e8f5ee;
+  --green-border: #b8dfc8;
+  --amber: #b45309;
+  --amber-bg: #fef3e2;
+  --amber-border: #f9d89a;
+  --red: #c0392b;
+  --red-bg: #fdecea;
+  --red-border: #f5b8b3;
+  --blue: #1a4fa0;
+  --blue-bg: #e8eef8;
+  --blue-border: #b8c8e8;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.app { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 230px; background: var(--text); display: flex; flex-direction: column; flex-shrink: 0; }
+.main { flex: 1; overflow-y: auto; }
+
+/* SIDEBAR */
+.logo { padding: 22px 20px 18px; border-bottom: 1px solid #2a2820; }
+.logo-name { font-family: var(--mono); font-size: 16px; font-weight: 600; color: #fff; letter-spacing: -.02em; }
+.logo-tag { font-size: 10px; color: #8a8478; text-transform: uppercase; letter-spacing: .1em; margin-top: 2px; }
+.company-pill { margin: 14px 14px 6px; background: #2a2820; border-radius: 8px; padding: 10px 12px; }
+.company-name { font-size: 12px; font-weight: 500; color: #e8e4dc; }
+.company-sub { font-size: 10.5px; color: #6a6458; margin-top: 1px; }
+.nav { padding: 8px 10px; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 7px; cursor: pointer; font-size: 13px; color: #8a8478; margin-bottom: 2px; transition: all .15s; }
+.nav-item:hover { background: #2a2820; color: #e8e4dc; }
+.nav-item.active { background: #e8f5ee; color: var(--green); }
+.nav-icon { font-size: 14px; width: 18px; text-align: center; }
+.nav-badge { margin-left: auto; font-size: 10px; background: var(--red); color: #fff; border-radius: 10px; padding: 1px 6px; font-family: var(--mono); }
+.sidebar-footer { padding: 14px 16px; border-top: 1px solid #2a2820; }
+.footer-stat { display: flex; justify-content: space-between; font-size: 11px; color: #6a6458; margin-bottom: 4px; }
+.footer-stat span:last-child { color: #e8e4dc; font-family: var(--mono); }
+
+/* MAIN */
+.page { display: none; padding: 28px 32px; }
+.page.active { display: block; }
+.page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
+.page-title { font-size: 22px; font-weight: 600; letter-spacing: -.03em; margin-bottom: 3px; }
+.page-sub { font-size: 13px; color: var(--text2); }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.stat-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); font-family: var(--mono); margin-bottom: 8px; }
+.stat-val { font-size: 24px; font-weight: 600; line-height: 1; margin-bottom: 4px; font-family: var(--mono); }
+.stat-note { font-size: 11.5px; color: var(--text3); }
+.c-green { color: var(--green); }
+.c-amber { color: var(--amber); }
+.c-red { color: var(--red); }
+.c-blue { color: var(--blue); }
+
+/* CARDS */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; }
+.card-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 13.5px; font-weight: 600; }
+
+/* TABLE */
+.table { width: 100%; border-collapse: collapse; }
+.table th { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); font-family: var(--mono); font-weight: 500; padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border); background: var(--bg); }
+.table td { padding: 13px 16px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--bg3); }
+.mono { font-family: var(--mono); font-size: 12px; }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 500; padding: 3px 8px; border-radius: 4px; font-family: var(--mono); }
+.badge-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.badge-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.badge-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.badge-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.badge-gray { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; font-family: var(--sans); }
+.btn-primary { background: var(--text); color: #fff; }
+.btn-primary:hover { background: #2a2820; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { background: #155e38; }
+.btn-red { background: var(--red); color: #fff; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--bg3); color: var(--text); }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+
+/* CREDIT METER */
+.credit-meter { height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+.credit-fill { height: 100%; border-radius: 4px; transition: width .6s; }
+
+/* DISTRIBUTOR CARD */
+.dist-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; transition: border-color .2s, box-shadow .2s; cursor: pointer; }
+.dist-card:hover { border-color: var(--border2); box-shadow: 0 2px 12px #0000000a; }
+.dist-card.overdue { border-left: 3px solid var(--red); }
+.dist-card.warning { border-left: 3px solid var(--amber); }
+.dist-card.good { border-left: 3px solid var(--green); }
+.dist-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.dist-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.dist-meta { font-size: 12px; color: var(--text2); }
+.dist-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 12px; }
+.dist-stat { text-align: center; }
+.dist-stat-val { font-size: 15px; font-weight: 600; font-family: var(--mono); }
+.dist-stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1/-1; }
+label { font-size: 11.5px; color: var(--text2); font-weight: 500; }
+input, select, textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; font-size: 13px; color: var(--text); font-family: var(--sans); outline: none; transition: border-color .15s; width: 100%; }
+input:focus, select:focus { border-color: var(--text); }
+
+/* MODAL */
+.modal-bg { display: none; position: fixed; inset: 0; background: #0008; z-index: 500; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px #0003; }
+.modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { font-size: 15px; font-weight: 600; }
+.modal-close { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 20px; line-height: 1; }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+/* ALERT */
+.alert { border-radius: 9px; padding: 12px 15px; font-size: 13px; line-height: 1.5; margin-bottom: 14px; }
+.alert-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.alert-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.alert-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.alert-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+
+/* TIMELINE */
+.timeline-item { display: flex; gap: 12px; margin-bottom: 16px; }
+.t-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.t-line-wrap { display: flex; flex-direction: column; align-items: center; }
+.t-connector { width: 1px; flex: 1; background: var(--border); margin: 3px 0; min-height: 16px; }
+.t-body { flex: 1; }
+.t-title { font-size: 13px; font-weight: 500; margin-bottom: 1px; }
+.t-sub { font-size: 11.5px; color: var(--text2); }
+.t-time { font-size: 10.5px; color: var(--text3); font-family: var(--mono); margin-top: 2px; }
+
+/* GRID */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* NOTIF */
+.notif { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: #e8e4dc; padding: 12px 18px; border-radius: 10px; font-size: 13px; z-index: 1000; display: none; box-shadow: 0 8px 24px #0003; animation: slideUp .25s ease; }
+@keyframes slideUp { from{transform:translateY(8px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+/* PAYMENT RECEIPT */
+.receipt { background: var(--bg3); border-radius: 10px; padding: 18px; font-family: var(--mono); font-size: 12px; line-height: 1.8; }
+.receipt-row { display: flex; justify-content: space-between; }
+.receipt-divider { border: none; border-top: 1px dashed var(--border2); margin: 8px 0; }
+
+/* SCORE BADGE */
+.risk-badge { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-name">CreditTrack</div>
+    <div class="logo-tag">Uganda Distribution</div>
+  </div>
+  <div class="company-pill">
+    <div class="company-name">Nile Breweries Ltd</div>
+    <div class="company-sub">Sales & Distribution Finance</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="nav('dashboard')"><span class="nav-icon">◈</span><span>Dashboard</span></div>
+    <div class="nav-item" onclick="nav('distributors')"><span class="nav-icon">◻</span><span>Distributors</span><span class="nav-badge" id="overdue-badge">4</span></div>
+    <div class="nav-item" onclick="nav('dispatch')"><span class="nav-icon">▷</span><span>New Dispatch</span></div>
+    <div class="nav-item" onclick="nav('payments')"><span class="nav-icon">◎</span><span>Record Payment</span></div>
+    <div class="nav-item" onclick="nav('alerts')"><span class="nav-icon">!</span><span>Alerts</span><span class="nav-badge" id="alert-badge">6</span></div>
+    <div class="nav-item" onclick="nav('reports')"><span class="nav-icon">▣</span><span>Reports</span></div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="footer-stat"><span>Total Outstanding</span><span>UGX 284M</span></div>
+    <div class="footer-stat"><span>Overdue &gt;30 days</span><span style="color:var(--red)">UGX 87M</span></div>
+    <div class="footer-stat"><span>Active Distributors</span><span>18</span></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Credit Dashboard</div>
+        <div class="page-sub">Real-time debt visibility across all 18 distributors — Nile Breweries Ltd</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm">Export Report</button>
+        <button class="btn btn-primary btn-sm" onclick="nav('dispatch')">+ New Dispatch</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Total Outstanding</div>
+        <div class="stat-val c-blue">284M</div>
+        <div class="stat-note">UGX — across 18 distributors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Overdue &gt;30 Days</div>
+        <div class="stat-val c-red">87M</div>
+        <div class="stat-note">UGX — 4 distributors affected</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Collected This Month</div>
+        <div class="stat-val c-green">142M</div>
+        <div class="stat-note">UGX — ↑18% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Credit Utilisation</div>
+        <div class="stat-val c-amber">71%</div>
+        <div class="stat-note">Avg across all distributors</div>
+      </div>
+    </div>
+
+    <!-- RISK SUMMARY -->
+    <div class="grid2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Distributor Risk Overview</div></div>
+        <div style="padding:16px 20px">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+              <span style="display:flex;align-items:center"><span class="risk-badge" style="background:var(--green)"></span>Good standing</span>
+              <span><strong>9</strong> distributors</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+              <span style="display:flex;align-items:center"><span class="risk-badge" style="background:var(--amber)"></span>Approaching limit</span>
+              <span><strong>5</strong> distributors</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+              <span style="display:flex;align-items:center"><span class="risk-badge" style="background:var(--red)"></span>Overdue / blocked</span>
+              <span><strong>4</strong> distributors</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Aged Debt Breakdown</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>0–15 days</span><span class="mono c-green">UGX 112M</span></div>
+                <div class="credit-meter"><div class="credit-fill" style="width:39%;background:var(--green)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>16–30 days</span><span class="mono c-amber">UGX 85M</span></div>
+                <div class="credit-meter"><div class="credit-fill" style="width:30%;background:var(--amber)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>31–60 days</span><span class="mono c-red">UGX 58M</span></div>
+                <div class="credit-meter"><div class="credit-fill" style="width:20%;background:var(--red)"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>&gt;60 days</span><span class="mono c-red">UGX 29M</span></div>
+                <div class="credit-meter"><div class="credit-fill" style="width:11%;background:#8b0000)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Recent Activity</div></div>
+        <div style="padding:14px 16px">
+          <div id="activity-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-red">
+      🚨 <strong>4 distributors</strong> have exceeded their payment terms by more than 30 days. New deliveries are <strong>automatically blocked</strong> until payment is received.
+      <span style="cursor:pointer;text-decoration:underline;margin-left:8px" onclick="nav('distributors')">View blocked accounts →</span>
+    </div>
+  </div>
+
+  <!-- DISTRIBUTORS PAGE -->
+  <div class="page" id="page-distributors">
+    <div class="page-header">
+      <div>
+        <div class="page-title">All Distributors</div>
+        <div class="page-sub">Click any distributor to view full credit history and dispatch log</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <select style="padding:7px 12px;font-size:12px;border-radius:7px;border:1px solid var(--border);background:var(--bg2)" onchange="filterDist(this.value)">
+          <option value="all">All Status</option>
+          <option value="overdue">Overdue</option>
+          <option value="warning">Near Limit</option>
+          <option value="good">Good</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="openAddDistModal()">+ Add Distributor</button>
+      </div>
+    </div>
+    <div id="dist-list"></div>
+  </div>
+
+  <!-- NEW DISPATCH PAGE -->
+  <div class="page" id="page-dispatch">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Record New Dispatch</div>
+        <div class="page-sub">Log goods dispatched to a distributor. Credit limit is checked automatically.</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:16px">📦 Dispatch Details</div>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Distributor</label>
+              <select id="dispatch-dist" onchange="checkCredit()">
+                <option value="">— Select distributor —</option>
+                <option value="0">Kampala Beverages Ltd (Nansana)</option>
+                <option value="1">East Uganda Distributors (Jinja)</option>
+                <option value="2">Gulu Central Traders</option>
+                <option value="3">Mbarara Premium Distributors</option>
+                <option value="4">Masaka Wholesale Ltd</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Dispatch Date</label>
+              <input type="date" id="dispatch-date" value="2025-05-19">
+            </div>
+            <div class="form-group">
+              <label>Truck / Vehicle</label>
+              <input placeholder="e.g. UAX 234F">
+            </div>
+            <div class="form-group">
+              <label>Driver Name</label>
+              <input placeholder="e.g. John Okello">
+            </div>
+            <div class="form-group">
+              <label>Driver Phone</label>
+              <input placeholder="e.g. 0772 123 456">
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:16px">🍺 Products Dispatched</div>
+          <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;padding:9px 12px;background:var(--bg);border-bottom:1px solid var(--border)">
+              <span style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-family:var(--mono)">Product</span>
+              <span style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-family:var(--mono)">Crates</span>
+              <span style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-family:var(--mono)">Price/Crate</span>
+              <span style="font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-family:var(--mono)">Total</span>
+            </div>
+            <div id="dispatch-items">
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;padding:9px 12px;border-bottom:1px solid var(--border)">
+                <select style="padding:6px 8px;font-size:12px"><option>Nile Special (500ml)</option><option>Club Pilsner (500ml)</option><option>Eagle Lager (500ml)</option><option>Nile Gold (330ml)</option></select>
+                <input type="number" value="50" class="d-qty" oninput="calcDispatch(this)" style="padding:6px 8px;font-size:12px">
+                <input type="number" value="48000" class="d-price" oninput="calcDispatch(this)" style="padding:6px 8px;font-size:12px">
+                <input readonly class="d-total" value="2,400,000" style="padding:6px 8px;font-size:12px;color:var(--text3)">
+              </div>
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;padding:9px 12px">
+                <select style="padding:6px 8px;font-size:12px"><option>Club Pilsner (500ml)</option><option>Nile Special (500ml)</option><option>Eagle Lager (500ml)</option></select>
+                <input type="number" value="30" class="d-qty" oninput="calcDispatch(this)" style="padding:6px 8px;font-size:12px">
+                <input type="number" value="44000" class="d-price" oninput="calcDispatch(this)" style="padding:6px 8px;font-size:12px">
+                <input readonly class="d-total" value="1,320,000" style="padding:6px 8px;font-size:12px;color:var(--text3)">
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addDispatchRow()">+ Add Product</button>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <!-- Credit Check Panel -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px" id="credit-check-panel">
+          <div style="font-size:14px;font-weight:600;margin-bottom:14px">💳 Credit Check</div>
+          <div id="credit-check-content">
+            <div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">
+              Select a distributor to see credit status
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:14px">📋 Dispatch Summary</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+              <span style="color:var(--text2)">Total Crates</span><span class="mono" id="d-total-crates">80</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+              <span style="color:var(--text2)">Goods Value</span><span class="mono" id="d-total-val">UGX 3,720,000</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+              <span style="color:var(--text2)">Payment Terms</span><span class="mono">21 days</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;">
+              <span>Due Date</span><span class="mono c-amber" id="d-due-date">09 Jun 2025</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px">
+            <button class="btn btn-ghost" style="flex:1">Preview</button>
+            <button class="btn btn-green" style="flex:1" onclick="confirmDispatch()">Confirm Dispatch →</button>
+          </div>
+        </div>
+
+        <!-- Payment terms info -->
+        <div class="alert alert-blue">
+          ℹ <strong>Auto-blocking:</strong> If this distributor exceeds their credit limit or has overdue payments after 30 days, new dispatches will be <strong>automatically blocked</strong> and an SMS alert sent to their account manager.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECORD PAYMENT PAGE -->
+  <div class="page" id="page-payments">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Record Payment</div>
+        <div class="page-sub">Log Mobile Money, bank transfer, or cash payment from a distributor</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:16px">💰 Payment Details</div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Distributor</label>
+            <select id="pay-dist" onchange="loadOutstanding()">
+              <option value="">— Select distributor —</option>
+              <option value="0">Kampala Beverages Ltd</option>
+              <option value="1">East Uganda Distributors</option>
+              <option value="2">Gulu Central Traders</option>
+              <option value="3">Mbarara Premium Distributors</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Payment Date</label>
+            <input type="date" value="2025-05-19">
+          </div>
+          <div class="form-group">
+            <label>Amount (UGX)</label>
+            <input type="number" id="pay-amount" placeholder="e.g. 5000000" oninput="updateReceipt()">
+          </div>
+          <div class="form-group">
+            <label>Payment Method</label>
+            <select id="pay-method" onchange="updateReceipt()">
+              <option>MTN Mobile Money</option>
+              <option>Airtel Money</option>
+              <option>Bank Transfer</option>
+              <option>Cash</option>
+              <option>Cheque</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Transaction / Reference #</label>
+            <input id="pay-ref" placeholder="e.g. MM250519001234" oninput="updateReceipt()">
+          </div>
+          <div class="form-group">
+            <label>Received By</label>
+            <input value="Sales Manager" id="pay-by">
+          </div>
+          <div class="form-group full">
+            <label>Notes (optional)</label>
+            <input placeholder="e.g. Partial payment for INV-2025-0031">
+          </div>
+        </div>
+        <button class="btn btn-green" style="width:100%;margin-top:16px;justify-content:center" onclick="recordPayment()">
+          ✓ Record Payment & Send SMS Receipt
+        </button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:14px">Outstanding Balance</div>
+          <div id="outstanding-panel">
+            <div style="color:var(--text3);font-size:13px;text-align:center;padding:16px 0">Select a distributor to view outstanding</div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:14px">Payment Receipt Preview</div>
+          <div class="receipt" id="receipt-preview">
+            <div style="text-align:center;margin-bottom:10px;font-weight:600;font-size:13px">NILE BREWERIES LTD</div>
+            <div style="text-align:center;font-size:11px;margin-bottom:10px;color:var(--text2)">Payment Receipt — CreditTrack Uganda</div>
+            <hr class="receipt-divider">
+            <div class="receipt-row"><span>Distributor:</span><span id="r-dist">—</span></div>
+            <div class="receipt-row"><span>Date:</span><span>19 May 2025</span></div>
+            <div class="receipt-row"><span>Method:</span><span id="r-method">MTN MoMo</span></div>
+            <div class="receipt-row"><span>Ref #:</span><span id="r-ref">—</span></div>
+            <hr class="receipt-divider">
+            <div class="receipt-row" style="font-weight:600;font-size:13px"><span>Amount Paid:</span><span id="r-amount" style="color:var(--green)">UGX —</span></div>
+            <div class="receipt-row"><span>Balance After:</span><span id="r-balance">UGX —</span></div>
+            <hr class="receipt-divider">
+            <div style="text-align:center;font-size:10px;color:var(--text3)">This receipt was auto-generated by CreditTrack</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTS PAGE -->
+  <div class="page" id="page-alerts">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Alerts & Notifications</div>
+        <div class="page-sub">Automated alerts for overdue payments, credit limits, and blocked accounts</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark All Read</button>
+    </div>
+
+    <div id="alerts-list"></div>
+  </div>
+
+  <!-- REPORTS PAGE -->
+  <div class="page" id="page-reports">
+    <div class="page-header">
+      <div class="page-title">Reports & Analytics</div>
+      <div class="page-sub">Collections performance and credit health</div>
+    </div>
+
+    <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-card">
+        <div class="stat-label">Collection Rate (May)</div>
+        <div class="stat-val c-green">78%</div>
+        <div class="stat-note">↑ from 64% in April</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Days to Pay</div>
+        <div class="stat-val c-amber">24</div>
+        <div class="stat-note">Target is 21 days</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bad Debt Written Off</div>
+        <div class="stat-val c-red">3.2M</div>
+        <div class="stat-note">UGX this year</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Top 5 Distributors by Outstanding Debt</div></div>
+        <table class="table">
+          <thead><tr><th>Distributor</th><th>Outstanding</th><th>Days Overdue</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr><td>Gulu Central Traders</td><td class="mono c-red">UGX 42M</td><td class="mono c-red">47 days</td><td><span class="badge badge-red">High</span></td></tr>
+            <tr><td>East Uganda Distributors</td><td class="mono c-amber">UGX 38M</td><td class="mono c-amber">32 days</td><td><span class="badge badge-red">High</span></td></tr>
+            <tr><td>Mbarara Premium</td><td class="mono c-amber">UGX 27M</td><td class="mono c-amber">28 days</td><td><span class="badge badge-amber">Medium</span></td></tr>
+            <tr><td>Kampala Beverages</td><td class="mono">UGX 21M</td><td class="mono">12 days</td><td><span class="badge badge-green">Low</span></td></tr>
+            <tr><td>Masaka Wholesale</td><td class="mono">UGX 18M</td><td class="mono">8 days</td><td><span class="badge badge-green">Low</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Monthly Collections (UGX M)</div></div>
+        <div style="padding:20px">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>January</span><span class="mono">UGX 98M</span></div>
+              <div class="credit-meter"><div class="credit-fill" style="width:69%;background:var(--blue)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>February</span><span class="mono">UGX 115M</span></div>
+              <div class="credit-meter"><div class="credit-fill" style="width:81%;background:var(--blue)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>March</span><span class="mono">UGX 104M</span></div>
+              <div class="credit-meter"><div class="credit-fill" style="width:73%;background:var(--blue)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>April</span><span class="mono">UGX 121M</span></div>
+              <div class="credit-meter"><div class="credit-fill" style="width:85%;background:var(--amber)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>May (to date)</span><span class="mono c-green">UGX 142M</span></div>
+              <div class="credit-meter"><div class="credit-fill" style="width:100%;background:var(--green)"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:16px;font-size:12px;color:var(--text2);background:var(--green-bg);border-radius:7px;padding:10px;color:var(--green)">
+            ↑ Collections improved <strong>45%</strong> since implementing CreditTrack in January 2025
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- DISTRIBUTOR DETAIL MODAL -->
+<div class="modal-bg" id="dist-modal">
+  <div class="modal" style="width:640px">
+    <div class="modal-header">
+      <h3 id="modal-dist-name">Distributor Details</h3>
+      <button class="modal-close" onclick="closeModal('dist-modal')">×</button>
+    </div>
+    <div class="modal-body" id="modal-dist-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('dist-modal')">Close</button>
+      <button class="btn btn-primary" onclick="nav('dispatch');closeModal('dist-modal')">New Dispatch</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD DISTRIBUTOR MODAL -->
+<div class="modal-bg" id="add-dist-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New Distributor</h3>
+      <button class="modal-close" onclick="closeModal('add-dist-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Company Name</label><input placeholder="e.g. Soroti Beverages Ltd"></div>
+        <div class="form-group"><label>Contact Person</label><input placeholder="Owner / Manager name"></div>
+        <div class="form-group"><label>Phone (MTN/Airtel)</label><input placeholder="0772 / 0752 XXXXXX"></div>
+        <div class="form-group"><label>Location / District</label><input placeholder="e.g. Soroti, Eastern Uganda"></div>
+        <div class="form-group"><label>Credit Limit (UGX)</label><input type="number" placeholder="e.g. 30000000"></div>
+        <div class="form-group"><label>Payment Terms</label><select><option>14 days</option><option selected>21 days</option><option>30 days</option><option>45 days</option></select></div>
+        <div class="form-group full"><label>Products Distributed</label><input placeholder="e.g. Nile Special, Club Pilsner, Eagle Lager"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('add-dist-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addDistributor()">Add Distributor</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ---- DATA ----
+const distributors = [
+  { id:0, name:'Kampala Beverages Ltd', location:'Nansana, Wakiso', contact:'Robert Ssemakula', phone:'0772 234 567', creditLimit:50000000, outstanding:21000000, overdueDays:12, status:'good', paymentTerms:21, lastPayment:'12 May 2025', lastPaymentAmt:15000000 },
+  { id:1, name:'East Uganda Distributors', location:'Jinja, Eastern', contact:'Moses Waiswa', phone:'0704 567 890', creditLimit:45000000, outstanding:38000000, overdueDays:32, status:'overdue', paymentTerms:21, lastPayment:'17 Apr 2025', lastPaymentAmt:8000000 },
+  { id:2, name:'Gulu Central Traders', location:'Gulu, Northern', contact:'Grace Akello', phone:'0782 123 456', creditLimit:40000000, outstanding:42000000, overdueDays:47, status:'overdue', paymentTerms:21, lastPayment:'1 Apr 2025', lastPaymentAmt:5000000 },
+  { id:3, name:'Mbarara Premium Distributors', location:'Mbarara, Western', contact:'Patrick Tumusiime', phone:'0756 789 012', creditLimit:35000000, outstanding:27000000, overdueDays:28, status:'warning', paymentTerms:21, lastPayment:'22 Apr 2025', lastPaymentAmt:12000000 },
+  { id:4, name:'Masaka Wholesale Ltd', location:'Masaka, Central', contact:'Sarah Nakato', phone:'0712 345 678', creditLimit:30000000, outstanding:18000000, overdueDays:8, status:'good', paymentTerms:21, lastPayment:'11 May 2025', lastPaymentAmt:20000000 },
+];
+
+const alerts_data = [
+  { type:'red', icon:'🔴', title:'Gulu Central Traders — 47 days overdue', body:'Outstanding balance of UGX 42M has exceeded payment terms by 47 days. Account is blocked. SMS sent to Grace Akello.', time:'Today, 8:04 AM', read:false },
+  { type:'red', icon:'🔴', title:'East Uganda Distributors — Blocked', body:'New dispatch attempt rejected. Account blocked due to 32-day overdue balance of UGX 38M. Moses Waiswa notified by SMS.', time:'Today, 7:30 AM', read:false },
+  { type:'amber', icon:'🟡', title:'Mbarara Premium — 90% credit limit reached', body:'Outstanding balance UGX 27M is 77% of UGX 35M credit limit. Monitor closely — approaching block threshold.', time:'Yesterday, 4:15 PM', read:false },
+  { type:'amber', icon:'🟡', title:'Automated SMS sent — 3 distributors', body:'Weekly payment reminder SMS sent to Gulu Central Traders, East Uganda Distributors, and Mbarara Premium.', time:'Yesterday, 9:00 AM', read:false },
+  { type:'green', icon:'🟢', title:'Payment received — Kampala Beverages Ltd', body:'UGX 15,000,000 received via MTN Mobile Money. Ref: MM250512004521. Balance updated automatically.', time:'12 May 2025', read:true },
+  { type:'green', icon:'🟢', title:'Payment received — Masaka Wholesale Ltd', body:'UGX 20,000,000 received via Bank Transfer. Balance reduced to UGX 18M. Account in good standing.', time:'11 May 2025', read:true },
+];
+
+const activity = [
+  { icon:'✓', color:'var(--green)', text:'Kampala Beverages paid UGX 15M', sub:'MTN MoMo · Ref MM250512004521', time:'12 May' },
+  { icon:'⊘', color:'var(--red)', text:'Gulu Central Traders — blocked', sub:'47 days overdue · UGX 42M outstanding', time:'Today' },
+  { icon:'▷', color:'var(--blue)', text:'New dispatch: Masaka Wholesale', sub:'80 crates Nile Special · UGX 3.84M', time:'Yesterday' },
+  { icon:'!', color:'var(--amber)', text:'Mbarara 90% credit limit alert', sub:'UGX 27M / 35M limit', time:'Yesterday' },
+];
+
+// ---- RENDER ----
+function renderDistributors(filter='all') {
+  const filtered = filter==='all' ? distributors : distributors.filter(d=>d.status===filter);
+  document.getElementById('dist-list').innerHTML = filtered.map(d => {
+    const pct = Math.round((d.outstanding/d.creditLimit)*100);
+    const meterColor = pct>90?'var(--red)':pct>70?'var(--amber)':'var(--green)';
+    return `
+    <div class="dist-card ${d.status}" onclick="openDistModal(${d.id})">
+      <div class="dist-header">
+        <div>
+          <div class="dist-name">${d.name}</div>
+          <div class="dist-meta">${d.location} · ${d.contact} · ${d.phone}</div>
+        </div>
+        <span class="badge badge-${d.status==='good'?'green':d.status==='warning'?'amber':'red'}">
+          ${d.status==='good'?'✓ Good standing':d.status==='warning'?'⚠ Near limit':'⊘ Overdue/Blocked'}
+        </span>
+      </div>
+      <div class="dist-stats">
+        <div class="dist-stat">
+          <div class="dist-stat-val" style="color:${d.overdueDays>30?'var(--red)':d.overdueDays>20?'var(--amber)':'var(--green)'}">${d.overdueDays}d</div>
+          <div class="dist-stat-label">Days Overdue</div>
+        </div>
+        <div class="dist-stat">
+          <div class="dist-stat-val" style="color:var(--blue)">${(d.outstanding/1000000).toFixed(0)}M</div>
+          <div class="dist-stat-label">Outstanding (UGX)</div>
+        </div>
+        <div class="dist-stat">
+          <div class="dist-stat-val">${(d.creditLimit/1000000).toFixed(0)}M</div>
+          <div class="dist-stat-label">Credit Limit</div>
+        </div>
+        <div class="dist-stat">
+          <div class="dist-stat-val" style="color:${meterColor}">${pct}%</div>
+          <div class="dist-stat-label">Limit Used</div>
+        </div>
+      </div>
+      <div class="credit-meter">
+        <div class="credit-fill" style="width:${Math.min(pct,100)}%;background:${meterColor}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11.5px;color:var(--text3)">
+        <span>Last payment: ${d.lastPayment} — UGX ${(d.lastPaymentAmt/1000000).toFixed(0)}M</span>
+        <span>Terms: ${d.paymentTerms} days</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openDistModal(id) {
+  const d = distributors[id];
+  document.getElementById('modal-dist-name').textContent = d.name;
+  document.getElementById('modal-dist-body').innerHTML = `
+    <div class="alert alert-${d.status==='good'?'green':d.status==='warning'?'amber':'red'}" style="margin-bottom:16px">
+      ${d.status==='overdue'?`⊘ Account blocked. ${d.overdueDays} days overdue. New dispatches rejected until payment is received.`:
+        d.status==='warning'?`⚠ Credit limit ${Math.round(d.outstanding/d.creditLimit*100)}% utilized. Monitor payment closely.`:
+        `✓ Account in good standing. Payments within terms.`}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div><div style="font-size:11px;color:var(--text3);margin-bottom:2px">Outstanding Balance</div><div style="font-size:20px;font-weight:600;font-family:var(--mono);color:${d.status==='overdue'?'var(--red)':'var(--text)'}">UGX ${(d.outstanding/1000000).toFixed(1)}M</div></div>
+      <div><div style="font-size:11px;color:var(--text3);margin-bottom:2px">Days Overdue</div><div style="font-size:20px;font-weight:600;font-family:var(--mono);color:${d.overdueDays>30?'var(--red)':d.overdueDays>15?'var(--amber)':'var(--green)'}">${d.overdueDays} days</div></div>
+      <div><div style="font-size:11px;color:var(--text3);margin-bottom:2px">Credit Limit</div><div style="font-size:16px;font-weight:600;font-family:var(--mono)">UGX ${(d.creditLimit/1000000).toFixed(0)}M</div></div>
+      <div><div style="font-size:11px;color:var(--text3);margin-bottom:2px">Last Payment</div><div style="font-size:14px;font-weight:500">${d.lastPayment}</div></div>
+    </div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:10px">Payment History (last 5)</div>
+    <table class="table" style="font-size:12px">
+      <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Ref</th></tr></thead>
+      <tbody>
+        <tr><td>${d.lastPayment}</td><td class="mono c-green">UGX ${(d.lastPaymentAmt/1000000).toFixed(1)}M</td><td>MTN MoMo</td><td class="mono">MM2505${id}2004${id}21</td></tr>
+        <tr><td>14 Apr 2025</td><td class="mono c-green">UGX ${((d.lastPaymentAmt*0.8)/1000000).toFixed(1)}M</td><td>Bank Transfer</td><td class="mono">UBA2504${id}3340</td></tr>
+        <tr><td>21 Mar 2025</td><td class="mono c-green">UGX ${((d.lastPaymentAmt*1.2)/1000000).toFixed(1)}M</td><td>MTN MoMo</td><td class="mono">MM2503${id}8812</td></tr>
+      </tbody>
+    </table>`;
+  document.getElementById('dist-modal').classList.add('open');
+}
+
+function renderAlerts() {
+  document.getElementById('alerts-list').innerHTML = alerts_data.map((a,i) => `
+    <div class="card" style="margin-bottom:10px;opacity:${a.read?0.6:1}">
+      <div style="padding:14px 18px;display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:16px;flex-shrink:0;margin-top:1px">${a.icon}</span>
+        <div style="flex:1">
+          <div style="font-size:13.5px;font-weight:600;margin-bottom:3px">${a.title}</div>
+          <div style="font-size:12.5px;color:var(--text2);line-height:1.5;margin-bottom:4px">${a.body}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${a.time}</div>
+        </div>
+        ${!a.read?`<button class="btn btn-ghost btn-sm" onclick="markRead(${i})">Dismiss</button>`:'<span style="font-size:11px;color:var(--text3)">Read</span>'}
+      </div>
+    </div>`).join('');
+}
+
+function renderActivity() {
+  document.getElementById('activity-list').innerHTML = activity.map((a,i) => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;${i<activity.length-1?'border-bottom:1px solid var(--border)':''}">
+      <span style="color:${a.color};font-size:14px;flex-shrink:0;margin-top:1px">${a.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:12.5px;font-weight:500">${a.text}</div>
+        <div style="font-size:11.5px;color:var(--text2)">${a.sub}</div>
+      </div>
+      <span style="font-size:11px;color:var(--text3);font-family:var(--mono);flex-shrink:0">${a.time}</span>
+    </div>`).join('');
+}
+
+// ---- DISPATCH ----
+function checkCredit() {
+  const idx = parseInt(document.getElementById('dispatch-dist').value);
+  if(isNaN(idx)) return;
+  const d = distributors[idx];
+  const pct = Math.round((d.outstanding/d.creditLimit)*100);
+  const color = d.status==='overdue'?'var(--red)':d.status==='warning'?'var(--amber)':'var(--green)';
+  document.getElementById('credit-check-content').innerHTML = `
+    <div class="alert alert-${d.status==='overdue'?'red':d.status==='warning'?'amber':'green'}" style="margin-bottom:12px">
+      ${d.status==='overdue'?`⊘ BLOCKED — Account overdue ${d.overdueDays} days. Dispatch not permitted.`:
+        d.status==='warning'?`⚠ CAUTION — ${pct}% of credit limit used. Dispatch permitted but monitor closely.`:
+        `✓ CLEAR — Account in good standing. Dispatch approved.`}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text2)">Current Outstanding</span><span class="mono" style="color:${color}">UGX ${(d.outstanding/1000000).toFixed(1)}M</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text2)">Credit Limit</span><span class="mono">UGX ${(d.creditLimit/1000000).toFixed(0)}M</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text2)">Available Credit</span><span class="mono c-green">UGX ${((d.creditLimit-d.outstanding)/1000000).toFixed(1)}M</span></div>
+    </div>
+    <div style="margin-top:10px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${pct}% used</div>
+      <div class="credit-meter"><div class="credit-fill" style="width:${Math.min(pct,100)}%;background:${color}"></div></div>
+    </div>`;
+}
+
+function calcDispatch(input) {
+  const row = input.closest('div[style*="grid"]');
+  const qty = parseFloat(row.querySelector('.d-qty')?.value)||0;
+  const price = parseFloat(row.querySelector('.d-price')?.value)||0;
+  const total = row.querySelector('.d-total');
+  if(total) total.value = (qty*price).toLocaleString();
+  let sub = 0, crates = 0;
+  document.querySelectorAll('.d-qty').forEach((q,i)=>{
+    const p = document.querySelectorAll('.d-price')[i];
+    const v = (parseFloat(q.value)||0)*(parseFloat(p?.value)||0);
+    sub += v; crates += parseFloat(q.value)||0;
+  });
+  document.getElementById('d-total-crates').textContent = crates;
+  document.getElementById('d-total-val').textContent = 'UGX '+Math.round(sub).toLocaleString();
+  const due = new Date(); due.setDate(due.getDate()+21);
+  document.getElementById('d-due-date').textContent = due.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+function addDispatchRow() {
+  const container = document.getElementById('dispatch-items');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;padding:9px 12px;border-top:1px solid var(--border)';
+  row.innerHTML = `
+    <select style="padding:6px 8px;font-size:12px"><option>Eagle Lager (500ml)</option><option>Nile Special (500ml)</option><option>Club Pilsner (500ml)</option></select>
+    <input type="number" value="20" class="d-qty" oninput="calcDispatch(this)" style="padding:6px 8px;font-size:12px">
+    <input type="number" value="42000" class="d-price" oninput="calcDispatch(this)" style="padding:6px 8px;font-size:12px">
+    <input readonly class="d-total" value="840,000" style="padding:6px 8px;font-size:12px;color:var(--text3)">`;
+  container.appendChild(row);
+  calcDispatch(row.querySelector('.d-qty'));
+}
+
+function confirmDispatch() {
+  const distIdx = document.getElementById('dispatch-dist').value;
+  if(!distIdx && distIdx!=='0') { showNotif('⚠ Please select a distributor first'); return; }
+  const d = distributors[parseInt(distIdx)];
+  if(d.status==='overdue') { showNotif('⊘ Dispatch BLOCKED — account overdue. Collect payment first.'); return; }
+  showNotif('✓ Dispatch recorded. Driver notified by SMS. Credit balance updated.');
+  d.outstanding += 3720000;
+}
+
+// ---- PAYMENTS ----
+function loadOutstanding() {
+  const idx = parseInt(document.getElementById('pay-dist').value);
+  if(isNaN(idx)) return;
+  const d = distributors[idx];
+  document.getElementById('outstanding-panel').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">Total Outstanding</span><span class="mono c-red">UGX ${(d.outstanding/1000000).toFixed(1)}M</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">Overdue (${d.overdueDays} days)</span><span class="mono c-amber">UGX ${(d.outstanding*0.6/1000000).toFixed(1)}M</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text2)">Credit Used</span><span class="mono">${Math.round(d.outstanding/d.creditLimit*100)}% of UGX ${(d.creditLimit/1000000).toFixed(0)}M</span></div>
+    </div>`;
+  document.getElementById('r-dist').textContent = d.name;
+}
+
+function updateReceipt() {
+  const amt = parseInt(document.getElementById('pay-amount').value)||0;
+  const distIdx = parseInt(document.getElementById('pay-dist').value);
+  document.getElementById('r-method').textContent = document.getElementById('pay-method').value;
+  document.getElementById('r-ref').textContent = document.getElementById('pay-ref').value||'—';
+  document.getElementById('r-amount').textContent = amt ? 'UGX '+amt.toLocaleString() : 'UGX —';
+  if(!isNaN(distIdx)) {
+    const d = distributors[distIdx];
+    const bal = Math.max(0, d.outstanding - amt);
+    document.getElementById('r-balance').textContent = 'UGX '+bal.toLocaleString();
+  }
+}
+
+function recordPayment() {
+  const distIdx = parseInt(document.getElementById('pay-dist').value);
+  const amt = parseInt(document.getElementById('pay-amount').value)||0;
+  if(isNaN(distIdx)) { showNotif('⚠ Please select a distributor'); return; }
+  if(!amt) { showNotif('⚠ Please enter the payment amount'); return; }
+  const d = distributors[distIdx];
+  d.outstanding = Math.max(0, d.outstanding - amt);
+  if(d.outstanding < d.creditLimit * 0.7) d.status = 'good';
+  showNotif(`✓ UGX ${amt.toLocaleString()} recorded. SMS receipt sent to ${d.contact} (${d.phone})`);
+  renderDistributors();
+}
+
+// ---- UTILS ----
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const idx = ['dashboard','distributors','dispatch','payments','alerts','reports'].indexOf(page);
+  document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+  if(page==='distributors') renderDistributors();
+  if(page==='alerts') renderAlerts();
+}
+
+function filterDist(val) { renderDistributors(val); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openAddDistModal() { document.getElementById('add-dist-modal').classList.add('open'); }
+function addDistributor() { closeModal('add-dist-modal'); showNotif('✓ Distributor added. Onboarding SMS sent.'); }
+function markRead(i) { alerts_data[i].read=true; renderAlerts(); }
+function markAllRead() { alerts_data.forEach(a=>a.read=true); renderAlerts(); showNotif('✓ All alerts marked as read'); }
+function showNotif(msg) {
+  const n=document.getElementById('notif'); n.textContent=msg; n.style.display='block';
+  clearTimeout(window._nt); window._nt=setTimeout(()=>n.style.display='none',3500);
+}
+
+// ---- INIT ----
+renderActivity();
+renderDistributors();
+renderAlerts();
+</script>
+</body>
+</html>
