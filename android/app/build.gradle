@@ -1,0 +1,43 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'ug.co.fiscalplatform.apps'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'ug.co.fiscalplatform.apps'
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName '1.0.0'
+    }
+
+    flavorDimensions += 'product'
+    productFlavors {
+        portal { dimension 'product'; applicationIdSuffix '.portal'; resValue 'string', 'app_name', 'Uganda Fiscal Platform'; buildConfigField 'String', 'APP_SLUG', '"portal"' }
+        taxlink { dimension 'product'; applicationIdSuffix '.taxlink'; resValue 'string', 'app_name', 'TaxLink Uganda'; buildConfigField 'String', 'APP_SLUG', '"taxlink"' }
+        taxlinkconnect { dimension 'product'; applicationIdSuffix '.taxlinkconnect'; resValue 'string', 'app_name', 'TaxLink Connect'; buildConfigField 'String', 'APP_SLUG', '"taxlinkconnect"' }
+        credittrack { dimension 'product'; applicationIdSuffix '.credittrack'; resValue 'string', 'app_name', 'CreditTrack Uganda'; buildConfigField 'String', 'APP_SLUG', '"credittrack"' }
+        verifyug { dimension 'product'; applicationIdSuffix '.verifyug'; resValue 'string', 'app_name', 'VerifyUG'; buildConfigField 'String', 'APP_SLUG', '"verifyug"' }
+        guardpost { dimension 'product'; applicationIdSuffix '.guardpost'; resValue 'string', 'app_name', 'GuardPost Uganda'; buildConfigField 'String', 'APP_SLUG', '"guardpost"' }
+        payrollguard { dimension 'product'; applicationIdSuffix '.payrollguard'; resValue 'string', 'app_name', 'PayrollGuard Uganda'; buildConfigField 'String', 'APP_SLUG', '"payrollguard"' }
+        deliverug { dimension 'product'; applicationIdSuffix '.deliverug'; resValue 'string', 'app_name', 'DeliverUG'; buildConfigField 'String', 'APP_SLUG', '"deliverug"' }
+        procureguard { dimension 'product'; applicationIdSuffix '.procureguard'; resValue 'string', 'app_name', 'ProcureGuard Uganda'; buildConfigField 'String', 'APP_SLUG', '"procureguard"' }
+        retailpulse { dimension 'product'; applicationIdSuffix '.retailpulse'; resValue 'string', 'app_name', 'RetailPulse Uganda'; buildConfigField 'String', 'APP_SLUG', '"retailpulse"' }
+        powercost { dimension 'product'; applicationIdSuffix '.powercost'; resValue 'string', 'app_name', 'PowerCost Uganda'; buildConfigField 'String', 'APP_SLUG', '"powercost"' }
+        efrisbridge { dimension 'product'; applicationIdSuffix '.efrisbridge'; resValue 'string', 'app_name', 'EFRIS Bridge'; buildConfigField 'String', 'APP_SLUG', '"efrisbridge"' }
+        efrisdash { dimension 'product'; applicationIdSuffix '.efrisdash'; resValue 'string', 'app_name', 'EFRIS Intelligence'; buildConfigField 'String', 'APP_SLUG', '"efrisdash"' }
+        debtwatch { dimension 'product'; applicationIdSuffix '.debtwatch'; resValue 'string', 'app_name', 'DebtWatch Uganda'; buildConfigField 'String', 'APP_SLUG', '"debtwatch"' }
+        fiscalai { dimension 'product'; applicationIdSuffix '.fiscalai'; resValue 'string', 'app_name', 'FiscalAI Uganda'; buildConfigField 'String', 'APP_SLUG', '"fiscalai"' }
+        customs { dimension 'product'; applicationIdSuffix '.customs'; resValue 'string', 'app_name', 'Customs Intelligence'; buildConfigField 'String', 'APP_SLUG', '"customs"' }
+    }
+
+    buildFeatures { buildConfig true }
+}
+
+tasks.register('bundleWebApps', Copy) {
+    from('../apps') { into 'apps' }
+    from('../frontend') { into 'portal' }
+    into('src/main/assets')
+}
+preBuild.dependsOn tasks.named('bundleWebApps')

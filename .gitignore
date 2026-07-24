@@ -1,3 +1,8 @@
 node_modules/
 .env
 *.log
+
+# Android build tool caches (not part of this project)
+.android-build-cache/
+.android-tools/
+.gradle/

@@ -2,7 +2,7 @@
   "name": "VerifyUG — Product Authentication",
   "short_name": "VerifyUG",
   "description": "VerifyUG — Product Authentication — part of the Uganda Fiscal Intelligence Platform.",
-  "start_url": "index.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#08090c",
@@ -20,5 +20,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "id": "/"
 }
